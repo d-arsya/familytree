@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { TreesIcon, ArrowRightIcon, HeartIcon, BookOpenIcon, LeafIcon } from "lucide-react"
+import { TreesIcon, ArrowRightIcon, HeartIcon, BookOpenIcon, LeafIcon, ImageIcon, BarChart3Icon } from "lucide-react"
 
 export default function HomePage() {
   return (
@@ -118,22 +118,30 @@ export default function HomePage() {
               kapsul waktu yang menyimpan warisan, dan jembatan yang menghubungkan masa lalu dengan masa depan.
             </p>
             <div className="grid sm:grid-cols-2 gap-4 mt-8">
-              <Card className="bg-muted/30 border-none shadow-none">
-                <CardHeader>
-                  <CardTitle className="text-base">Melestarikan Tradisi</CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">
-                  Mendokumentasikan resep, lagu, dan ritual unik keluarga.
-                </CardContent>
-              </Card>
-              <Card className="bg-muted/30 border-none shadow-none">
-                <CardHeader>
-                  <CardTitle className="text-base">Menghubungkan Hati</CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">
-                  Mengenal sepupu jauh dan memahami konteks sejarah leluhur.
-                </CardContent>
-              </Card>
+              <Link href="/gallery" className="block group">
+                <Card className="bg-muted/30 border-none shadow-none hover:bg-muted/50 transition-colors cursor-pointer h-full">
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2 group-hover:text-primary transition-colors">
+                      <ImageIcon className="size-4" /> Galeri Keluarga
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-sm text-muted-foreground">
+                    Kumpulan foto dan kenangan wajah-wajah anggota keluarga besar.
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link href="/statistics" className="block group">
+                <Card className="bg-muted/30 border-none shadow-none hover:bg-muted/50 transition-colors cursor-pointer h-full">
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2 group-hover:text-primary transition-colors">
+                      <BarChart3Icon className="size-4" /> Statistik & Data
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-sm text-muted-foreground">
+                    Analisis data keluarga, sebaran usia, dan statistik menarik lainnya.
+                  </CardContent>
+                </Card>
+              </Link>
             </div>
           </section>
 
