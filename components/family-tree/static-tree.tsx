@@ -22,9 +22,11 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
     const svgRef = React.useRef<SVGSVGElement>(null)
     const { theme } = useTheme()
 
-    // State for modal
+    // State for modal & UI
     const [selectedPerson, setSelectedPerson] = React.useState<any | null>(null)
     const [modalOpen, setModalOpen] = React.useState(false)
+    const [searchQuery, setSearchQuery] = React.useState("")
+    const [searchResults, setSearchResults] = React.useState<any[]>([])
 
     // Helper to find root
     const findRoot = () => {
@@ -39,27 +41,35 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
         return persons[0]
     }
 
+    // Search Logic
+    React.useEffect(() => {
+        if (searchQuery.length > 2) {
+            const query = searchQuery.toLowerCase()
+            const filtered = persons.filter(p => p.name.toLowerCase().includes(query))
+            setSearchResults(filtered)
+        } else {
+            setSearchResults([])
+        }
+    }, [searchQuery, persons])
+
     React.useEffect(() => {
         if (!svgRef.current || persons.length === 0) return
 
-        const width = 1200
-        const height = 800
+        const svgElement = svgRef.current
+        const svgWidth = svgElement.clientWidth || 1200
+        const svgHeight = svgElement.clientHeight || 800
 
         const svg = d3.select(svgRef.current)
         svg.selectAll("*").remove()
 
-        const g = svg.append("g").attr("transform", "translate(40,40)")
-
-        // Add defs for patterns
-        const defs = svg.append("defs")
+        const g = svg.append("g")
 
         const zoom = d3.zoom<SVGSVGElement, unknown>()
-            .scaleExtent([0.1, 3])
+            .scaleExtent([0.1, 4])
             .on("zoom", (e) => {
                 g.attr("transform", e.transform)
             })
         svg.call(zoom)
-        svg.call(zoom.translateTo, width / 2, 100)
 
         const rootPerson = findRoot()
         if (!rootPerson) return
@@ -89,73 +99,66 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
 
         const rootData = buildHierarchy(rootPerson.id)
         const hierarchy = d3.hierarchy(rootData)
-        const treeLayout = d3.tree().nodeSize([250, 200])
+        const treeLayout = d3.tree().nodeSize([500, 240]) // Horizontal spacing fix
         const rootNode = treeLayout(hierarchy)
 
-        // Helper to render card content (Selection is a single 'g' element)
+        // Add defs for filters and patterns
+        const defs = svg.append("defs")
+
+        // Shadow Filter
+        const shadowFilterId = "card-shadow"
+        const filter = defs.append("filter").attr("id", shadowFilterId).attr("x", "-20%").attr("y", "-20%").attr("width", "140%").attr("height", "140%")
+        filter.append("feGaussianBlur").attr("in", "SourceAlpha").attr("stdDeviation", "2").attr("result", "blur")
+        filter.append("feOffset").attr("in", "blur").attr("dx", "1").attr("dy", "1").attr("result", "offsetBlur")
+        const merge = filter.append("feMerge")
+        merge.append("feMergeNode").attr("in", "offsetBlur")
+        merge.append("feMergeNode").attr("in", "SourceGraphic")
+
+        // Helper to render card content
         const renderCardContent = (sel: d3.Selection<SVGGElement, any, any, any>, p: any, parentId?: string) => {
-            // Rect Card
+            // Card Rect
             sel.append("rect")
-                .attr("width", 200)
-                .attr("height", 80)
-                .attr("x", -100)
-                .attr("y", -40)
+                .attr("width", 184)
+                .attr("height", 84)
+                .attr("x", -92)
+                .attr("y", -42)
                 .attr("rx", 10)
                 .attr("fill", theme === "dark" ? "#1e293b" : "#ffffff")
                 .attr("stroke", p?.gender === "MALE" ? "#3b82f6" : p?.gender === "FEMALE" ? "#ec4899" : "#94a3b8")
                 .attr("stroke-width", 2)
-                .attr("filter", "url(#card-shadow)")
+                .attr("filter", `url(#${shadowFilterId})`)
 
-            // Avatar Group
-            const avatar = sel.append("g").attr("transform", "translate(-65, 0)")
-
-            avatar.append("circle")
-                .attr("r", 25)
-                .attr("fill", theme === "dark" ? "#334155" : "#f1f5f9")
+            // Avatar circle
+            const avatar = sel.append("g").attr("transform", "translate(-62, 0)")
+            avatar.append("circle").attr("r", 25).attr("fill", theme === "dark" ? "#334155" : "#f1f5f9")
 
             if (p?.photoUrl) {
-                const patternId = `pattern-${p.id.replace(/[^a-zA-Z0-9]/g, "")}`
+                const patternId = `p-${p.id.replace(/[^a-zA-Z0-9]/g, "")}`
                 if (!defs.select(`#${patternId}`).size()) {
                     defs.append("pattern")
                         .attr("id", patternId)
-                        .attr("width", 1)
-                        .attr("height", 1)
+                        .attr("width", 1).attr("height", 1)
                         .attr("patternContentUnits", "objectBoundingBox")
                         .append("image")
                         .attr("xlink:href", p.photoUrl)
-                        .attr("width", 1)
-                        .attr("height", 1)
+                        .attr("width", 1).attr("height", 1)
                         .attr("preserveAspectRatio", "xMidYMid slice")
                 }
-
-                avatar.append("circle")
-                    .attr("r", 25)
-                    .attr("fill", `url(#${patternId})`)
+                avatar.append("circle").attr("r", 25).attr("fill", `url(#${patternId})`)
             } else {
                 const initials = p?.name?.split(" ").map((n: string) => n[0]).join("").toUpperCase().substring(0, 2) || "?"
-                avatar.append("text")
-                    .attr("text-anchor", "middle")
-                    .attr("dy", "0.35em")
-                    .attr("font-size", "16px")
-                    .attr("font-weight", "bold")
-                    .attr("fill", "#94a3b8")
-                    .text(initials)
+                avatar.append("text").attr("text-anchor", "middle").attr("dy", "0.35em").attr("font-size", "14px").attr("font-weight", "bold").attr("fill", "#94a3b8").text(initials)
             }
 
-            // Info Group
             const info = sel.append("g").attr("transform", "translate(-25, 0)")
 
-            info.append("text")
-                .attr("dy", "-0.1em")
-                .attr("font-size", "14px")
-                .attr("font-weight", "bold")
-                .attr("fill", theme === "dark" ? "#f8fafc" : "#0f172a")
-                .text(p?.name || "Unknown")
+            // Fixed Name Overflow
+            const nameStr = p?.name || "Unknown"
+            const truncatedName = nameStr.length > 20 ? nameStr.substring(0, 18) + "..." : nameStr
+            info.append("text").attr("dy", "-0.1em").attr("font-size", "13px").attr("font-weight", "bold").attr("fill", theme === "dark" ? "#f8fafc" : "#0f172a").text(truncatedName)
 
-            // Sub-info: Year and (Optional) Other Parent
+            // Year and Partner disambiguation
             let subText = p?.dateOfBirth ? new Date(p.dateOfBirth).getFullYear().toString() : ""
-
-            // If we have a parentId context, find the other parent to disambiguate spouses
             if (parentId && p.originFamily) {
                 const otherParent = p.originFamily.partners.find((part: any) => part.personId !== parentId)?.person
                 if (otherParent) {
@@ -163,67 +166,32 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
                     subText += ` (${initials})`
                 }
             }
+            info.append("text").attr("dy", "1.4em").attr("font-size", "11px").attr("fill", "#64748b").text(subText)
 
-            info.append("text")
-                .attr("dy", "1.4em")
-                .attr("font-size", "12px")
-                .attr("fill", "#64748b")
-                .text(subText)
-
+            // Address truncation
             if (p?.placeOfBirth) {
-                info.append("text")
-                    .attr("dy", "2.8em")
-                    .attr("font-size", "10px")
-                    .attr("fill", "#94a3b8")
-                    .text(p.placeOfBirth.length > 20 ? p.placeOfBirth.substring(0, 18) + "..." : p.placeOfBirth)
+                const truncatedAddr = p.placeOfBirth.length > 22 ? p.placeOfBirth.substring(0, 20) + "..." : p.placeOfBirth
+                info.append("text").attr("dy", "2.8em").attr("font-size", "10px").attr("fill", "#94a3b8").text(truncatedAddr)
             }
         }
 
-        // Add shadow filter to defs
-        const shadowFilterId = "card-shadow"
-        if (!defs.select(`#${shadowFilterId}`).size()) {
-            const filter = defs.append("filter").attr("id", shadowFilterId).attr("x", "-20%").attr("y", "-20%").attr("width", "140%").attr("height", "140%")
-            filter.append("feGaussianBlur").attr("in", "SourceAlpha").attr("stdDeviation", "2").attr("result", "blur")
-            filter.append("feOffset").attr("in", "blur").attr("dx", "1").attr("dy", "1").attr("result", "offsetBlur")
-            const merge = filter.append("feMerge")
-            merge.append("feMergeNode").attr("in", "offsetBlur")
-            merge.append("feMergeNode").attr("in", "SourceGraphic")
-        }
-
         // Render Links
-        g.append("g")
-            .attr("fill", "none")
-            .attr("stroke", "#cbd5e1")
-            .attr("stroke-opacity", 0.6)
-            .attr("stroke-width", 2)
-            .selectAll("path")
-            .data(rootNode.links())
-            .join("path")
-            .attr("d", d3.linkVertical()
-                .x((d: any) => d.x)
-                .y((d: any) => d.y) as any
-            )
+        g.append("g").attr("fill", "none").attr("stroke", "#cbd5e1").attr("stroke-opacity", 0.6).attr("stroke-width", 2)
+            .selectAll("path").data(rootNode.links()).join("path")
+            .attr("d", d3.linkVertical().x((d: any) => d.x).y((d: any) => d.y) as any)
 
         // Render Nodes
-        const nodeSelection = g.append("g")
-            .selectAll("g")
-            .data(rootNode.descendants())
-            .join("g")
+        const nodeSelection = g.append("g").selectAll("g").data(rootNode.descendants()).join("g")
             .attr("transform", (d: any) => `translate(${d.x},${d.y})`)
             .attr("cursor", "pointer")
-            .on("click", (e, d) => {
-                const data = d.data as any
-                const p = persons.find(per => per.id === data.name)
-                if (p) {
-                    setSelectedPerson(p)
-                    setModalOpen(true)
-                }
+            .on("click", (e, d: any) => {
+                const p = persons.find(per => per.id === d.data.name)
+                if (p) { setSelectedPerson(p); setModalOpen(true); }
             })
 
         nodeSelection.each(function (d: any) {
             const p = persons.find(per => per.id === d.data.name)
-            const parentId = d.parent?.data?.name // Context for "Other Parent" logic
-            renderCardContent(d3.select(this), p, parentId)
+            renderCardContent(d3.select(this as SVGGElement), p, (d.parent?.data as any)?.name)
         })
 
         // Render Partners
@@ -243,35 +211,85 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
                 })
             })
 
-            const uniquePartners = Array.from(new Map(partnersList.map(p => [p.id, p])).values())
-
-            uniquePartners.forEach((partner, i) => {
-                const group = d3.select(this)
-                const offset = 220 * (i + 1)
-
-                group.append("path")
-                    .attr("d", `M 100 0 L ${offset - 100} 0`)
-                    .attr("stroke", "#ec4899")
-                    .attr("stroke-width", 2)
-                    .attr("stroke-dasharray", "4,4")
-
-                const pGroup = group.append("g")
-                    .attr("transform", `translate(${offset}, 0)`)
-                    .attr("cursor", "pointer")
-                    .on("click", (e) => {
-                        e.stopPropagation()
-                        setSelectedPerson(partner)
-                        setModalOpen(true)
-                    })
-
+            const uniquePartners = Array.from(new Map(partnersList.map(pair => [pair.id, pair])).values())
+            uniquePartners.forEach((partner: any, i) => {
+                const group = d3.select(this as SVGGElement)
+                const offset = 210 * (i + 1) // Horizontal offset for spouse
+                group.append("path").attr("d", `M 92 0 L ${offset - 92} 0`).attr("stroke", "#ec4899").attr("stroke-width", 2).attr("stroke-dasharray", "4,4")
+                const pGroup = group.append("g").attr("transform", `translate(${offset}, 0)`).attr("cursor", "pointer")
+                    .on("click", (e) => { e.stopPropagation(); setSelectedPerson(partner); setModalOpen(true); })
                 renderCardContent(pGroup, partner)
             })
         })
 
+        // Zoom helper
+        const focusOn = (x: number, y: number) => {
+            svg.transition().duration(750).call(
+                zoom.transform,
+                d3.zoomIdentity.translate(svgWidth / 2, svgHeight / 2).scale(1).translate(-x, -y)
+            )
+        }
+
+        // Initial Center
+        focusOn(rootNode.x, rootNode.y)
+
+            // Expose focus function through window for search
+            ; (window as any).focusTreeNode = (id: string) => {
+                const target = rootNode.descendants().find((d: any) => d.data.name === id)
+                if (target) {
+                    focusOn(target.x, target.y)
+                } else {
+                    // Focus primary parent if it's a partner
+                    const nodes = rootNode.descendants()
+                    for (const d of nodes) {
+                        const p = persons.find(per => per.id === (d.data as any).name)
+                        if (p?.partnerships?.some(part => families.find(f => f.id === part.familyId)?.partners.some(fp => fp.personId === id))) {
+                            focusOn(d.x, d.y)
+                            break
+                        }
+                    }
+                }
+            }
+
     }, [persons, families, theme])
 
     return (
-        <>
+        <div className="w-full h-full relative group">
+            {/* Search Box */}
+            <div className="absolute top-4 left-4 z-50 w-72">
+                <div className="relative">
+                    <input
+                        type="text"
+                        placeholder="Cari nama..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full h-10 pl-10 pr-4 bg-background/80 backdrop-blur-md border rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                    />
+                    <svg className="absolute left-3 top-2.5 size-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+
+                {searchResults.length > 0 && (
+                    <div className="mt-2 bg-background/90 backdrop-blur-md border rounded-xl shadow-xl overflow-hidden max-h-60 overflow-y-auto">
+                        {searchResults.map(p => (
+                            <button
+                                key={p.id}
+                                onClick={() => {
+                                    (window as any).focusTreeNode(p.id)
+                                    setSearchQuery("")
+                                    setSearchResults([])
+                                }}
+                                className="w-full px-4 py-3 text-left hover:bg-primary/10 border-b last:border-0 transition-colors"
+                            >
+                                <p className="text-sm font-semibold">{p.name}</p>
+                                <p className="text-[10px] text-muted-foreground uppercase">{p.gender === 'MALE' ? 'Laki-laki' : 'Perempuan'}</p>
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+
             <div className="w-full h-full overflow-hidden">
                 <svg ref={svgRef} className="w-full h-full" />
             </div>
@@ -282,6 +300,6 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
                 onOpenChange={setModalOpen}
                 readOnly={readOnly}
             />
-        </>
+        </div>
     )
 }
