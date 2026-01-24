@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AddPersonDialog } from "@/components/family-tree/add-person-dialog"
-import { StaticTree } from "@/components/family-tree/static-tree"
+import { HorizontalTree } from "@/components/family-tree/horizontal-tree"
 
 async function getTreeData() {
     const persons = await prisma.person.findMany({
@@ -90,16 +90,17 @@ async function TreeContent() {
     return (
         <div className="w-full h-full relative">
             <div className="absolute inset-0 w-full h-full">
-                <StaticTree
+                <HorizontalTree
                     persons={JSON.parse(JSON.stringify(persons))}
                     families={JSON.parse(JSON.stringify(families))}
+                    isEditor={true}
                 />
             </div>
         </div>
     )
 }
 
-export default function VerticalTreePage() {
+export default function EditorPage() {
     return (
         <div className="h-screen flex flex-col bg-background">
             {/* Header - Interactive & Responsive */}
@@ -112,7 +113,7 @@ export default function VerticalTreePage() {
                     </Button>
                     <div className="flex items-center gap-2">
                         <TreesIcon className="size-5 text-primary" />
-                        <span className="font-semibold text-sm sm:text-base hidden sm:inline-block">Editor</span>
+                        <span className="font-semibold text-sm sm:text-base hidden sm:inline-block">Editor Pohon</span>
                         <span className="font-semibold text-sm sm:hidden">Editor</span>
                     </div>
                 </div>
@@ -120,13 +121,13 @@ export default function VerticalTreePage() {
                     <Button variant="outline" size="sm" asChild className="px-2 sm:px-3">
                         <Link href="/tree">
                             <GalleryHorizontalEndIcon className="size-4 sm:mr-2" />
-                            <span className="hidden sm:inline">View</span>
+                            <span className="hidden sm:inline">View Mode</span>
                         </Link>
                     </Button>
 
-                    {/* <div className="scale-90 sm:scale-100">
+                    <div className="scale-90 sm:scale-100">
                         <AddPersonDialog />
-                    </div> */}
+                    </div>
                 </div>
             </header>
 

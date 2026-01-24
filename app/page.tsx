@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { TreesIcon, ArrowRightIcon, HeartIcon, BookOpenIcon, LeafIcon, ImageIcon, BarChart3Icon } from "lucide-react"
+import { TreesIcon, ArrowRightIcon, HeartIcon, BookOpenIcon, LeafIcon, ImageIcon, BarChart3Icon, CalendarIcon } from "lucide-react"
 
 export default function HomePage() {
   return (
@@ -65,6 +65,64 @@ export default function HomePage() {
                 </Link>
               </Button>
             </div>
+          </div>
+        </section>
+
+        {/* Quick Access Features - Moved Up for Visibility */}
+        <section className="max-w-4xl mx-auto mb-24">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Link href="/gallery" className="block group">
+              <Card className="bg-card border shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-pointer h-full">
+                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                  <div className="p-3 bg-primary/10 rounded-full text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                    <ImageIcon className="size-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold">Galeri Foto</h3>
+                    <p className="text-xs text-muted-foreground mt-1">Wajah Keluarga</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/statistics" className="block group">
+              <Card className="bg-card border shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-pointer h-full">
+                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                  <div className="p-3 bg-primary/10 rounded-full text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                    <BarChart3Icon className="size-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold">Statistik</h3>
+                    <p className="text-xs text-muted-foreground mt-1">Data & Fakta</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/calendar" className="block group">
+              <Card className="bg-card border shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-pointer h-full">
+                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                  <div className="p-3 bg-primary/10 rounded-full text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                    <CalendarIcon className="size-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold">Kalender</h3>
+                    <p className="text-xs text-muted-foreground mt-1">Ultah & Haul</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/calculator" className="block group">
+              <Card className="bg-card border shadow-sm hover:shadow-md hover:border-primary/50 transition-all cursor-pointer h-full">
+                <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                  <div className="p-3 bg-primary/10 rounded-full text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                    <HeartIcon className="size-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold">Hubungan</h3>
+                    <p className="text-xs text-muted-foreground mt-1">Cek Relasi</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           </div>
         </section>
 

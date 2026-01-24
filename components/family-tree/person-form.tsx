@@ -47,6 +47,9 @@ interface PersonFormProps {
 export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormProps) {
     const isEdit = !!defaultValues?.id
     const [isPending, startTransition] = React.useTransition()
+    const [citiesData, setCitiesData] = React.useState<Record<string, string[]>>({})
+    const [selectedProvinceBirth, setSelectedProvinceBirth] = React.useState<string>("")
+    const [selectedProvinceDeath, setSelectedProvinceDeath] = React.useState<string>("")
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
@@ -65,6 +68,14 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
         },
     })
 
+    // Load cities data
+    React.useEffect(() => {
+        fetch('/cities.json')
+            .then(res => res.json())
+            .then(data => setCitiesData(data))
+            .catch(err => console.error('Failed to load cities:', err))
+    }, [])
+
     // Update form when defaultValues change (essential for Modal/Sheet reuse)
     React.useEffect(() => {
         if (defaultValues) {
@@ -82,8 +93,20 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
                 spouseId: (defaultValues as any).spouseId || (defaultValues as any).partnerships?.[0]?.family?.partners?.find((p: any) => p.personId !== (defaultValues as any).id)?.personId || undefined,
             })
             setPhotoPreview(defaultValues.photoUrl || "")
+
+            // Attempt to find and set province based on city
+            if (Object.keys(citiesData).length > 0) {
+                if (defaultValues.placeOfBirth) {
+                    const prov = Object.keys(citiesData).find(p => citiesData[p].includes(defaultValues.placeOfBirth!))
+                    if (prov) setSelectedProvinceBirth(prov)
+                }
+                if (defaultValues.placeOfDeath) {
+                    const prov = Object.keys(citiesData).find(p => citiesData[p].includes(defaultValues.placeOfDeath!))
+                    if (prov) setSelectedProvinceDeath(prov)
+                }
+            }
         }
-    }, [defaultValues, form])
+    }, [defaultValues, form, citiesData])
 
     const [photoPreview, setPhotoPreview] = React.useState(defaultValues?.photoUrl || "")
     const [peopleList, setPeopleList] = React.useState<{ id: string, name: string, gender: string | null, dateOfBirth: string | null }[]>([])
@@ -191,7 +214,7 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
                         value={form.watch("gender") || undefined}
                         onValueChange={(val) => form.setValue("gender", val as any)}
                     >
-                        <SelectTrigger>
+                        <SelectTrigger className="h-9 w-full">
                             <SelectValue placeholder="Pilih..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -225,7 +248,7 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
                             value={form.watch("fatherId") || undefined}
                             onValueChange={(v) => form.setValue("fatherId", v)}
                         >
-                            <SelectTrigger><SelectValue placeholder="Pilih Ayah" /></SelectTrigger>
+                            <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Pilih Ayah" /></SelectTrigger>
                             <SelectContent>
                                 {getOlderPeople("MALE").map(p => (
                                     <SelectItem key={p.id} value={p.id}>{p.name} ({p.dateOfBirth ? p.dateOfBirth.substring(0, 4) : '?'})</SelectItem>
@@ -239,7 +262,7 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
                             value={form.watch("motherId") || undefined}
                             onValueChange={(v) => form.setValue("motherId", v)}
                         >
-                            <SelectTrigger><SelectValue placeholder="Pilih Ibu" /></SelectTrigger>
+                            <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Pilih Ibu" /></SelectTrigger>
                             <SelectContent>
                                 {getOlderPeople("FEMALE").map(p => (
                                     <SelectItem key={p.id} value={p.id}>{p.name} ({p.dateOfBirth ? p.dateOfBirth.substring(0, 4) : '?'})</SelectItem>
@@ -254,7 +277,7 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
                         value={form.watch("spouseId") || undefined}
                         onValueChange={(v) => form.setValue("spouseId", v)}
                     >
-                        <SelectTrigger><SelectValue placeholder="Pilih Pasangan" /></SelectTrigger>
+                        <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Pilih Pasangan" /></SelectTrigger>
                         <SelectContent>
                             {getPotentialSpouses().map(p => (
                                 <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
@@ -264,21 +287,51 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 border-t pt-4">
-                <div className="space-y-2">
-                    <Label>Alamat</Label>
-                    <Input {...form.register("placeOfBirth")} placeholder="Kota" />
-                </div>
-            </div>
+            {/* Data Kelahiran */}
+            <div className="border-t pt-4 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-            <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label>Tanggal Lahir</Label>
-                    <Input type="date" {...form.register("dateOfBirth")} />
+                    <div className="space-y-2">
+                        <Label>Provinsi</Label>
+                        <Select value={selectedProvinceBirth} onValueChange={setSelectedProvinceBirth}>
+                            <SelectTrigger className="h-9 w-full">
+                                <SelectValue placeholder="Pilih Provinsi..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Object.keys(citiesData).sort().map((prov, i) => (
+                                    <SelectItem key={i} value={prov}>{prov}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Alamat (Kota)</Label>
+                        <Select
+                            value={form.watch("placeOfBirth") || ""}
+                            onValueChange={(val) => form.setValue("placeOfBirth", val)}
+                            disabled={!selectedProvinceBirth}
+                        >
+                            <SelectTrigger className="h-9 w-full">
+                                <SelectValue placeholder="Pilih Kota..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {(citiesData[selectedProvinceBirth] || []).sort().map((city, i) => (
+                                    <SelectItem key={i} value={city}>{city}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
-                <div className="space-y-2">
-                    <Label>Tanggal Wafat</Label>
-                    <Input type="date" {...form.register("dateOfDeath")} />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label>Tanggal Lahir</Label>
+                        <Input type="date" {...form.register("dateOfBirth")} className="h-9" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Tanggal Wafat</Label>
+                        <Input type="date" {...form.register("dateOfDeath")} className="h-9" />
+                    </div>
                 </div>
             </div>
 

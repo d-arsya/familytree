@@ -118,7 +118,7 @@ export default function TreePage() {
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2">
                     <Button variant="outline" size="sm" asChild className="px-2 sm:px-3">
-                        <Link href="/tree/vertical">
+                        <Link href="/tree/editor">
                             <TreesIcon className="size-4 sm:mr-2" />
                             <span className="hidden sm:inline">Editor</span>
                         </Link>

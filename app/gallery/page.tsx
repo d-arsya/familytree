@@ -48,13 +48,28 @@ export default async function GalleryPage() {
                 </div>
             </header>
 
-            <main className="flex-1 container mx-auto p-4 md:p-8">
+            <main className="flex-1 container mx-auto p-4 md:p-8 space-y-6">
+                <div className="bg-muted/30 border rounded-lg p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <div className="p-2 bg-primary/10 rounded-full text-primary">
+                            <ImageIcon className="size-4" />
+                        </div>
+                        <p>
+                            Foto diambil secara otomatis dari profil anggota keluarga.
+                            Untuk menambahkan foto, buka <strong>Editor Pohon</strong>, pilih anggota keluarga, klik <strong>Edit</strong>, dan unggah foto profil.
+                        </p>
+                    </div>
+                    <Button variant="outline" size="sm" asChild>
+                        <Link href="/tree/editor">Buka Editor Pohon</Link>
+                    </Button>
+                </div>
+
                 {photos.length === 0 ? (
                     <div className="text-center space-y-4 py-20 text-muted-foreground">
                         <ImageIcon className="size-16 mx-auto opacity-20" />
                         <p>Belum ada foto anggota keluarga.</p>
                         <Button variant="outline" asChild>
-                            <Link href="/tree">Tambah di Pohon Keluarga</Link>
+                            <Link href="/tree/editor">Tambah Foto di Editor</Link>
                         </Button>
                     </div>
                 ) : (

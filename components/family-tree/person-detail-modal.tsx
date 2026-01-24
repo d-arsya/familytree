@@ -148,14 +148,17 @@ export function PersonDetailModal({
                             <p className="text-muted-foreground text-sm">{person.bio}</p>
                         )}
 
-                        <div className="space-y-3 pt-2">
+                        <div className="space-y-4 pt-2">
                             {person.dateOfBirth && (
                                 <div className="flex items-start gap-3">
-                                    <CalendarIcon className="size-4 text-muted-foreground mt-0.5" />
+                                    <div className="p-2 bg-primary/10 rounded-lg text-primary mt-0.5">
+                                        <CalendarIcon className="size-4" />
+                                    </div>
                                     <div>
-                                        <p className="text-sm font-medium">Tanggal Lahir</p>
+                                        <p className="text-sm font-medium">Kelahiran</p>
                                         <p className="text-sm text-muted-foreground">
                                             {formatDate(new Date(person.dateOfBirth))}
+                                            {person.placeOfBirth && ` • ${person.placeOfBirth}`}
                                         </p>
                                     </div>
                                 </div>
@@ -163,21 +166,26 @@ export function PersonDetailModal({
 
                             {person.dateOfDeath && (
                                 <div className="flex items-start gap-3">
-                                    <CalendarIcon className="size-4 text-muted-foreground mt-0.5" />
+                                    <div className="p-2 bg-muted rounded-lg text-muted-foreground mt-0.5">
+                                        <CalendarIcon className="size-4" />
+                                    </div>
                                     <div>
-                                        <p className="text-sm font-medium">Tanggal Wafat</p>
+                                        <p className="text-sm font-medium">Wafat</p>
                                         <p className="text-sm text-muted-foreground">
                                             {formatDate(new Date(person.dateOfDeath))}
+                                            {person.placeOfDeath && ` • ${person.placeOfDeath}`}
                                         </p>
                                     </div>
                                 </div>
                             )}
 
-                            {person.placeOfBirth && (
+                            {!person.dateOfDeath && person.placeOfBirth && (
                                 <div className="flex items-start gap-3">
-                                    <MapPinIcon className="size-4 text-muted-foreground mt-0.5" />
+                                    <div className="p-2 bg-primary/10 rounded-lg text-primary mt-0.5">
+                                        <MapPinIcon className="size-4" />
+                                    </div>
                                     <div>
-                                        <p className="text-sm font-medium">Alamat</p>
+                                        <p className="text-sm font-medium">Alamat (Kota)</p>
                                         <p className="text-sm text-muted-foreground">
                                             {person.placeOfBirth}
                                         </p>

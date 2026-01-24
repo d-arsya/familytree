@@ -5,6 +5,16 @@ import * as d3 from "d3"
 import { useTheme } from "next-themes"
 import { Person, Family, Partnership } from "@prisma/client"
 import { PersonDetailModal } from "./person-detail-modal"
+import { PersonForm } from "./person-form"
+import { FilterIcon } from "lucide-react"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 // Types (Same as StaticTree)
 interface TreePerson extends Person {
@@ -15,22 +25,27 @@ interface TreePerson extends Person {
 interface HorizontalTreeProps {
     persons: TreePerson[]
     families: (Family & { partners: (Partnership & { person: Person })[]; children: Person[] })[]
+    isEditor?: boolean
 }
 
-export function HorizontalTree({ persons, families }: HorizontalTreeProps) {
+export function HorizontalTree({ persons, families, isEditor = false }: HorizontalTreeProps) {
     const svgRef = React.useRef<SVGSVGElement>(null)
     const { theme } = useTheme()
 
-    // State for modal & UI
+    // State
     const [selectedPerson, setSelectedPerson] = React.useState<any | null>(null)
     const [modalOpen, setModalOpen] = React.useState(false)
+    const [editDialogOpen, setEditDialogOpen] = React.useState(false)
+    const [personToEdit, setPersonToEdit] = React.useState<any | null>(null)
     const [searchQuery, setSearchQuery] = React.useState("")
     const [searchResults, setSearchResults] = React.useState<any[]>([])
+    const [startDepth, setStartDepth] = React.useState(1)
+    const [endDepth, setEndDepth] = React.useState(100)
+    const [zoomRef, setZoomRef] = React.useState<any>(null)
 
     const findRoot = () => {
         const roots = persons.filter(p => !p.originFamilyId)
         if (roots.length > 0) {
-            // Sort roots by createdAt or DOB
             return roots.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())[0]
         }
         return persons[0]
@@ -61,6 +76,7 @@ export function HorizontalTree({ persons, families }: HorizontalTreeProps) {
                 g.attr("transform", e.transform)
             })
         svg.call(zoom)
+        setZoomRef(() => zoom)
 
         const rootPerson = findRoot()
         if (!rootPerson) return
@@ -78,17 +94,19 @@ export function HorizontalTree({ persons, families }: HorizontalTreeProps) {
             })
         })
 
-        // Build hierarchy
-        const buildHierarchy = (personId: string): any => {
+        // Build hierarchy limited by endDepth
+        const buildHierarchy = (personId: string, currentDepth: number): any => {
+            if (currentDepth > endDepth) return null
+
             const childrenIds = childrenMap.get(personId) || []
             const uniqueChildren = Array.from(new Set(childrenIds))
 
             const node: any = {
                 name: personId,
-                children: uniqueChildren.map(childId => buildHierarchy(childId))
+                depth: currentDepth,
+                children: uniqueChildren.map(childId => buildHierarchy(childId, currentDepth + 1)).filter(Boolean)
             }
 
-            // Allow sorting children at each level
             if (node.children.length > 0) {
                 node.children.sort((a: any, b: any) => {
                     const pA = persons.find(p => p.id === a.name)
@@ -102,12 +120,40 @@ export function HorizontalTree({ persons, families }: HorizontalTreeProps) {
             return node
         }
 
-        const rootData = buildHierarchy(rootPerson.id)
+        let rootData = buildHierarchy(rootPerson.id, 1)
+
+        // Handle startDepth > 1 by finding all nodes at that depth
+        if (rootData && startDepth > 1) {
+            const nodesAtStart: any[] = []
+            const findAtDepth = (n: any) => {
+                if (!n) return
+                if (n.depth === startDepth) {
+                    nodesAtStart.push(n)
+                } else if (n.children) {
+                    n.children.forEach(findAtDepth)
+                }
+            }
+            findAtDepth(rootData)
+
+            if (nodesAtStart.length === 1) {
+                rootData = nodesAtStart[0]
+            } else if (nodesAtStart.length > 1) {
+                rootData = {
+                    name: "VIRTUAL_ROOT",
+                    virtual: true,
+                    children: nodesAtStart
+                }
+            } else {
+                rootData = null
+            }
+        }
+
+        if (!rootData) return // If no nodes remain after filtering
         const hierarchy = d3.hierarchy(rootData)
 
         // Horizontal Layout: nodeSize([height, width]) 
-        // We want wide separation vertically (nodes are stacked) and appropriate horizontal depth
-        const treeLayout = d3.tree().nodeSize([180, 280])
+        // Increased vertical gap significantly to 240px to accommodate multiple partners
+        const treeLayout = d3.tree().nodeSize([240, 280])
         const rootNode = treeLayout(hierarchy)
 
         // Add defs
@@ -122,21 +168,21 @@ export function HorizontalTree({ persons, families }: HorizontalTreeProps) {
 
         // Helper: Card Renderer
         const renderCardContent = (sel: d3.Selection<SVGGElement, any, any, any>, p: any) => {
-            // Simplified Card Style for Passive View
+            // Minimized Gap Card Style
             sel.append("rect")
-                .attr("width", 240) // Wider card for long names
-                .attr("height", 80)
-                .attr("x", -120)
-                .attr("y", -40)
-                .attr("rx", 40) // Pill shape
+                .attr("width", 220) // Normal width
+                .attr("height", 70) // Reduced height
+                .attr("x", -110)
+                .attr("y", -35)
+                .attr("rx", 35) // Pill shape
                 .attr("fill", theme === "dark" ? "#1e293b" : "#ffffff")
                 .attr("stroke", p?.gender === "MALE" ? "#3b82f6" : p?.gender === "FEMALE" ? "#ec4899" : "#94a3b8")
                 .attr("stroke-width", 2)
                 .attr("filter", `url(#${shadowFilterId})`)
 
             // Avatar
-            const avatar = sel.append("g").attr("transform", "translate(-90, 0)")
-            avatar.append("circle").attr("r", 32).attr("fill", theme === "dark" ? "#334155" : "#f1f5f9")
+            const avatar = sel.append("g").attr("transform", "translate(-85, 0)")
+            avatar.append("circle").attr("r", 28).attr("fill", theme === "dark" ? "#334155" : "#f1f5f9")
 
             if (p?.photoUrl) {
                 const patternId = `ph-${p.id.replace(/[^a-zA-Z0-9]/g, "")}`
@@ -147,33 +193,56 @@ export function HorizontalTree({ persons, families }: HorizontalTreeProps) {
                         .append("image").attr("xlink:href", p.photoUrl)
                         .attr("width", 1).attr("height", 1).attr("preserveAspectRatio", "xMidYMid slice")
                 }
-                avatar.append("circle").attr("r", 32).attr("fill", `url(#${patternId})`)
+                avatar.append("circle").attr("r", 28).attr("fill", `url(#${patternId})`)
             } else {
                 const initials = p?.name?.split(" ").map((n: string) => n[0]).join("").toUpperCase().substring(0, 2) || "?"
-                avatar.append("text").attr("text-anchor", "middle").attr("dy", "0.35em").attr("font-size", "16px").attr("font-weight", "bold").attr("fill", "#94a3b8").text(initials)
+                avatar.append("text").attr("text-anchor", "middle").attr("dy", "0.35em").attr("font-size", "14px").attr("font-weight", "bold").attr("fill", "#94a3b8").text(initials)
             }
 
             const info = sel.append("g").attr("transform", "translate(-45, 0)")
 
             const nameStr = p?.name || "Unknown"
-            const truncatedName = nameStr.length > 18 ? nameStr.substring(0, 16) + "..." : nameStr
-            info.append("text").attr("dy", "-0.4em").attr("font-size", "14px").attr("font-weight", "bold").attr("fill", theme === "dark" ? "#f8fafc" : "#0f172a").text(truncatedName)
+            // Smarter truncation
+            let displayName = nameStr
+            if (nameStr.length > 25) {
+                const parts = nameStr.split(" ")
+                displayName = parts.length > 2 ? parts.slice(0, 2).join(" ") + "..." : nameStr.substring(0, 22) + "..."
+            }
+
+            info.append("text")
+                .attr("dy", "-0.4em")
+                .attr("font-size", displayName.length > 18 ? "12px" : "13px")
+                .attr("font-weight", "bold")
+                .attr("fill", theme === "dark" ? "#f8fafc" : "#0f172a")
+                .text(displayName)
 
             const yob = p?.dateOfBirth ? new Date(p.dateOfBirth).getFullYear().toString() : ""
-            info.append("text").attr("dy", "1.2em").attr("font-size", "12px").attr("fill", "#64748b").text(yob || "Unknown Year")
+            const yod = p?.dateOfDeath ? new Date(p.dateOfDeath).getFullYear().toString() : ""
+            const dateRange = yod ? `${yob || "?"} - ${yod}` : (yob || "Unknown")
+
+            info.append("text")
+                .attr("dy", "1.2em")
+                .attr("font-size", "11px")
+                .attr("fill", "#64748b")
+                .text(dateRange)
         }
 
         // Render Links (Horizontal)
         g.append("g").attr("fill", "none").attr("stroke", "#cbd5e1").attr("stroke-opacity", 0.6).attr("stroke-width", 2)
-            .selectAll("path").data(rootNode.links()).join("path")
+            .selectAll("path")
+            .data(rootNode.links().filter((l: any) => !l.source.data.virtual)) // Hide links from virtual root
+            .join("path")
             .attr("d", d3.linkHorizontal()
-                .x((d: any) => d.y) // Swap X/Y for horizontal
+                .x((d: any) => d.y)
                 .y((d: any) => d.x) as any
             )
 
         // Render Nodes
-        const nodeSelection = g.append("g").selectAll("g").data(rootNode.descendants()).join("g")
-            .attr("transform", (d: any) => `translate(${d.y},${d.x})`) // Swap X/Y
+        const nodeSelection = g.append("g")
+            .selectAll("g")
+            .data(rootNode.descendants().filter((d: any) => !d.data.virtual)) // Hide virtual root node
+            .join("g")
+            .attr("transform", (d: any) => `translate(${d.y},${d.x})`)
             .attr("cursor", "pointer")
             .on("click", (e, d: any) => {
                 const p = persons.find(per => per.id === d.data.name)
@@ -185,12 +254,8 @@ export function HorizontalTree({ persons, families }: HorizontalTreeProps) {
             renderCardContent(d3.select(this as SVGGElement), p)
         })
 
-        // Render Partners (Slightly offset vertically or horizontally?)
-        // In horizontal layout, partners should probably be below or next to the node.
-        // Let's put them below (vertically offset in y-axis)
-        // Wait, 'y' in D3 horizontal tree is the horizontal axis (depth), 'x' is vertical (breadth).
-        // So offset in 'x' puts them below/above. Offset in 'y' puts them next to.
-
+        // Render Partners - Vertical Gap Issue
+        // If we reduce node gap, partners must be closer too.
         nodeSelection.each(function (d: any) {
             const p = persons.find(per => per.id === d.data.name)
             if (!p || !p.partnerships) return
@@ -207,16 +272,15 @@ export function HorizontalTree({ persons, families }: HorizontalTreeProps) {
                 })
             })
 
-            // Unique partners
             const uniquePartners = Array.from(new Map(partnersList.map(pair => [pair.id, pair])).values())
 
             uniquePartners.forEach((partner: any, i) => {
                 const group = d3.select(this as SVGGElement)
-                const offset = 80 * (i + 1) // 80px vertical offset
+                const offset = 85 * (i + 1) // Offset 85px (Card is 70px height)
 
                 // Connector
                 group.append("path")
-                    .attr("d", `M 0 35 L 0 ${offset - 35}`) // Vertical line down from center
+                    .attr("d", `M 0 35 L 0 ${offset - 35}`) // Vertical line
                     .attr("stroke", "#ec4899").attr("stroke-width", 2).attr("stroke-dasharray", "4,4")
 
                 const pGroup = group.append("g")
@@ -226,54 +290,43 @@ export function HorizontalTree({ persons, families }: HorizontalTreeProps) {
 
                 renderCardContent(pGroup, partner)
 
-                // Keep coords for search focus (Swapped)
                 partner.xCoords = d.y; // X on screen
                 partner.yCoords = d.x + offset; // Y on screen
             })
         })
 
-        // Zoom helper
+        // Initial Focus
         const focusOn = (screenX: number, screenY: number) => {
             const svgWidth = svgRef.current?.clientWidth || 1000
             const svgHeight = svgRef.current?.clientHeight || 800
-            svg.transition().duration(750).call(
-                zoom.transform,
-                d3.zoomIdentity.translate(svgWidth / 2, svgHeight / 2).scale(1).translate(-screenX, -screenY)
-            )
+            if (zoom) {
+                svg.transition().duration(750).call(
+                    zoom.transform,
+                    d3.zoomIdentity.translate(svgWidth / 2, svgHeight / 2).scale(1).translate(-screenX, -screenY)
+                )
+            }
         }
-
-        // Center Root (y, x) -> (horizontal, vertical)
         focusOn(rootNode.y, rootNode.x)
 
             ; (window as any).focusHorizontalNode = (id: string) => {
                 const target = rootNode.descendants().find((d: any) => d.data.name === id)
                 if (target) {
-                    focusOn(target.y, target.x) // Swap for focus
-                } else {
-                    // Check partners
-                    // Helper to find partner coordinates manually
-                    // Simplified: just try to find primary node
-                    const nodes = rootNode.descendants()
-                    for (const d of nodes) {
-                        const p = persons.find(per => per.id === (d.data as any).name)
-                        if (p?.partnerships?.some(part => families.find(f => f.id === part.familyId)?.partners.some(fp => fp.personId === id))) {
-                            focusOn(d.y, d.x)
-                            break
-                        }
-                    }
+                    focusOn(target.y, target.x)
                 }
             }
 
-    }, [persons, families, theme])
+    }, [persons, families, theme, startDepth, endDepth])
 
     return (
         <div className="w-full h-full relative group bg-gradient-to-r from-background to-muted/20">
-            {/* Search Box */}
-            <div className="absolute top-4 left-4 z-50 w-72">
-                <div className="relative">
+
+            {/* Toolbar */}
+            <div className="absolute top-4 left-4 z-50 flex flex-col gap-2">
+                {/* Search */}
+                <div className="relative w-72">
                     <input
                         type="text"
-                        placeholder="Cari..."
+                        placeholder={isEditor ? "Cari untuk Edit..." : "Cari..."}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full h-10 pl-10 pr-4 bg-background/80 backdrop-blur-md border rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
@@ -281,26 +334,55 @@ export function HorizontalTree({ persons, families }: HorizontalTreeProps) {
                     <svg className="absolute left-3 top-2.5 size-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
+
+                    {searchResults.length > 0 && (
+                        <div className="absolute top-full mt-2 w-full bg-background/90 backdrop-blur-md border rounded-xl shadow-xl overflow-hidden max-h-60 overflow-y-auto">
+                            {searchResults.map(p => (
+                                <button
+                                    key={p.id}
+                                    onClick={() => {
+                                        (window as any).focusHorizontalNode(p.id)
+                                        setSearchQuery("")
+                                        setSearchResults([])
+                                    }}
+                                    className="w-full px-4 py-3 text-left hover:bg-primary/10 border-b last:border-0 transition-colors"
+                                >
+                                    <p className="text-sm font-semibold">{p.name}</p>
+                                    <p className="text-[10px] text-muted-foreground uppercase">{p.gender === 'MALE' ? 'Laki-laki' : 'Perempuan'}</p>
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                {searchResults.length > 0 && (
-                    <div className="mt-2 bg-background/90 backdrop-blur-md border rounded-xl shadow-xl overflow-hidden max-h-60 overflow-y-auto">
-                        {searchResults.map(p => (
-                            <button
-                                key={p.id}
-                                onClick={() => {
-                                    (window as any).focusHorizontalNode(p.id)
-                                    setSearchQuery("")
-                                    setSearchResults([])
-                                }}
-                                className="w-full px-4 py-3 text-left hover:bg-primary/10 border-b last:border-0 transition-colors"
-                            >
-                                <p className="text-sm font-semibold">{p.name}</p>
-                                <p className="text-[10px] text-muted-foreground uppercase">{p.gender === 'MALE' ? 'Laki-laki' : 'Perempuan'}</p>
-                            </button>
-                        ))}
+                {/* Generation Filter */}
+                <div className="bg-background/80 backdrop-blur-md border rounded-xl shadow-lg p-3 flex items-center gap-2">
+                    <FilterIcon className="size-4 text-muted-foreground" />
+                    <div className="flex items-center gap-2">
+                        <Select value={startDepth.toString()} onValueChange={(val) => setStartDepth(Number(val))}>
+                            <SelectTrigger className="w-[80px] h-8 border-0 bg-transparent focus:ring-0 font-medium text-sm">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(d => (
+                                    <SelectItem key={d} value={d.toString()}>Gen {d}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <span className="text-xs text-muted-foreground">-</span>
+                        <Select value={endDepth.toString()} onValueChange={(val) => setEndDepth(Number(val))}>
+                            <SelectTrigger className="w-[80px] h-8 border-0 bg-transparent focus:ring-0 font-medium text-sm">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(d => (
+                                    <SelectItem key={d} value={d.toString()}>Gen {d}</SelectItem>
+                                ))}
+                                <SelectItem value="100">Semua</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
-                )}
+                </div>
             </div>
 
             <div className="w-full h-full overflow-hidden">
@@ -311,8 +393,37 @@ export function HorizontalTree({ persons, families }: HorizontalTreeProps) {
                 person={selectedPerson}
                 open={modalOpen}
                 onOpenChange={setModalOpen}
-                readOnly={true} // Always read-only
+                readOnly={!isEditor}
+                onEdit={isEditor ? (id) => {
+                    setPersonToEdit(selectedPerson)
+                    setEditDialogOpen(true)
+                    setModalOpen(false)
+                } : undefined}
             />
+
+            {/* Edit Dialog */}
+            {isEditor && personToEdit && (
+                <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>Edit Anggota Keluarga</DialogTitle>
+                        </DialogHeader>
+                        <PersonForm
+                            defaultValues={personToEdit}
+                            onSuccess={() => {
+                                setEditDialogOpen(false)
+                                setPersonToEdit(null)
+                                // Reload page to see changes
+                                window.location.reload()
+                            }}
+                            onCancel={() => {
+                                setEditDialogOpen(false)
+                                setPersonToEdit(null)
+                            }}
+                        />
+                    </DialogContent>
+                </Dialog>
+            )}
         </div>
     )
 }
