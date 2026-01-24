@@ -112,7 +112,7 @@ export default function VerticalTreePage() {
                     </Button>
                     <div className="flex items-center gap-2">
                         <TreesIcon className="size-5 text-primary" />
-                        <span className="font-semibold text-sm sm:text-base hidden sm:inline-block">Vertical Editor</span>
+                        <span className="font-semibold text-sm sm:text-base hidden sm:inline-block">Editor</span>
                         <span className="font-semibold text-sm sm:hidden">Editor</span>
                     </div>
                 </div>
@@ -120,13 +120,13 @@ export default function VerticalTreePage() {
                     <Button variant="outline" size="sm" asChild className="px-2 sm:px-3">
                         <Link href="/tree">
                             <GalleryHorizontalEndIcon className="size-4 sm:mr-2" />
-                            <span className="hidden sm:inline">Horizontal View</span>
+                            <span className="hidden sm:inline">View</span>
                         </Link>
                     </Button>
 
-                    <div className="scale-90 sm:scale-100">
+                    {/* <div className="scale-90 sm:scale-100">
                         <AddPersonDialog />
-                    </div>
+                    </div> */}
                 </div>
             </header>
 

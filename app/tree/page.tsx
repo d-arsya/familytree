@@ -112,21 +112,17 @@ export default function TreePage() {
                     </Button>
                     <div className="flex items-center gap-2">
                         <GalleryHorizontalEndIcon className="size-5 text-primary" />
-                        <span className="font-semibold text-sm sm:text-base hidden sm:inline-block">Horizontal View</span>
-                        <span className="font-semibold text-sm sm:hidden">Horizontal</span>
+                        <span className="font-semibold text-sm sm:text-base hidden sm:inline-block">Silsilah Keluarga</span>
+                        <span className="font-semibold text-sm sm:hidden">Silsilah</span>
                     </div>
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2">
                     <Button variant="outline" size="sm" asChild className="px-2 sm:px-3">
                         <Link href="/tree/vertical">
                             <TreesIcon className="size-4 sm:mr-2" />
-                            <span className="hidden sm:inline">Vertical Editor</span>
+                            <span className="hidden sm:inline">Editor</span>
                         </Link>
                     </Button>
-
-                    <div className="scale-90 sm:scale-100">
-                        <AddPersonDialog />
-                    </div>
                 </div>
             </header>
 

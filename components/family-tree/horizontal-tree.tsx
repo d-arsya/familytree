@@ -273,7 +273,7 @@ export function HorizontalTree({ persons, families }: HorizontalTreeProps) {
                 <div className="relative">
                     <input
                         type="text"
-                        placeholder="Cari (Mode Horizontal)..."
+                        placeholder="Cari..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full h-10 pl-10 pr-4 bg-background/80 backdrop-blur-md border rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
