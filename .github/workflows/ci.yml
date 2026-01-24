@@ -29,6 +29,8 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:latest
+          build-args: |
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
 
   deploy:
     runs-on: ubuntu-latest
