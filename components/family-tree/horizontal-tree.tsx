@@ -322,8 +322,8 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
 
             {/* Toolbar */}
             <div className="absolute top-4 left-4 z-50 flex flex-col gap-2">
-                {/* Search */}
-                <div className="relative w-72">
+                {/* Search - Higher z-index to stay above filter */}
+                <div className="relative w-72 z-10">
                     <input
                         type="text"
                         placeholder={isEditor ? "Cari untuk Edit..." : "Cari..."}
@@ -336,7 +336,7 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
                     </svg>
 
                     {searchResults.length > 0 && (
-                        <div className="absolute top-full mt-2 w-full bg-background/90 backdrop-blur-md border rounded-xl shadow-xl overflow-hidden max-h-60 overflow-y-auto">
+                        <div className="absolute top-full mt-2 w-full z-20 bg-background/90 backdrop-blur-md border rounded-xl shadow-xl overflow-hidden max-h-60 overflow-y-auto">
                             {searchResults.map(p => (
                                 <button
                                     key={p.id}
@@ -355,8 +355,8 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
                     )}
                 </div>
 
-                {/* Generation Filter */}
-                <div className="bg-background/80 backdrop-blur-md border rounded-xl shadow-lg p-3 flex items-center gap-2">
+                {/* Generation Filter - Lower z-index */}
+                <div className="relative z-0 bg-background/80 backdrop-blur-md border rounded-xl shadow-lg p-3 flex items-center gap-2">
                     <FilterIcon className="size-4 text-muted-foreground" />
                     <div className="flex items-center gap-2">
                         <Select value={startDepth.toString()} onValueChange={(val) => setStartDepth(Number(val))}>

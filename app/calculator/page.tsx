@@ -2,19 +2,49 @@ import Link from "next/link"
 import { ArrowLeftIcon, HeartIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { CalculatorClient } from "@/components/family-tree/calculator-client"
+
+// Types
+type PersonSimple = {
+    id: string,
+    name: string,
+    gender?: string | null,
+    fatherId?: string | null,
+    motherId?: string | null,
+    spouseIds?: string[]
+}
+
+// Stats fetcher
 import { prisma } from "@/lib/prisma"
 
 async function getData() {
-    const persons = await prisma.person.findMany({
+    const allPeople = await prisma.person.findMany({
         select: {
             id: true,
             name: true,
+            gender: true,
             originFamily: {
                 select: {
                     partners: {
                         select: {
-                            personId: true,
-                            role: true,
+                            person: {
+                                select: {
+                                    id: true,
+                                    gender: true
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            partnerships: {
+                select: {
+                    family: {
+                        select: {
+                            partners: {
+                                select: {
+                                    personId: true
+                                }
+                            }
                         }
                     }
                 }
@@ -22,15 +52,25 @@ async function getData() {
         }
     })
 
-    return persons.map(p => {
-        const parents = p.originFamily?.partners || []
-        const father = parents.find(par => par.role === "HUSBAND")?.personId
-        const mother = parents.find(par => par.role === "WIFE")?.personId
+    return allPeople.map(p => {
+        const potentialParents = p.originFamily?.partners?.map(part => part.person) || []
+        const father = potentialParents.find(pp => pp.gender === "MALE")?.id
+        const mother = potentialParents.find(pp => pp.gender === "FEMALE")?.id
+
+        // Extract spouse IDs from all families they are part of
+        const spouseIds = p.partnerships.flatMap(part =>
+            part.family.partners
+                .filter(fp => fp.personId !== p.id)
+                .map(fp => fp.personId)
+        )
+
         return {
             id: p.id,
             name: p.name,
+            gender: p.gender,
             fatherId: father,
             motherId: mother,
+            spouseIds: Array.from(new Set(spouseIds))
         }
     })
 }

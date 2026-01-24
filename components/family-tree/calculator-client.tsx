@@ -8,7 +8,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { calculateRelationship } from "@/lib/relationship"
 
-type PersonSimple = { id: string, name: string, fatherId?: string | null, motherId?: string | null }
+type PersonSimple = { id: string, name: string, gender?: string | null, fatherId?: string | null, motherId?: string | null, spouseIds?: string[] }
 
 export function CalculatorClient({ people }: { people: PersonSimple[] }) {
     const [personA, setPersonA] = React.useState<string>("")
@@ -19,7 +19,8 @@ export function CalculatorClient({ people }: { people: PersonSimple[] }) {
 
     const handleCalculate = () => {
         if (!personA || !personB) return
-        const res = calculateRelationship(people, personA, personB)
+        console.log("Calculating relationship between:", personA, personB);
+        const res = calculateRelationship(people as any, personA, personB)
         setResult(res)
     }
 
@@ -38,7 +39,7 @@ export function CalculatorClient({ people }: { people: PersonSimple[] }) {
                                 <SearchIcon className="ml-2 size-4 opacity-50" />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[300px] p-0">
+                        <PopoverContent className="w-[400px] p-0">
                             <Command>
                                 <CommandInput placeholder="Cari nama..." />
                                 <CommandList>
@@ -47,7 +48,7 @@ export function CalculatorClient({ people }: { people: PersonSimple[] }) {
                                         {people.map(p => (
                                             <CommandItem
                                                 key={p.id}
-                                                value={p.name}
+                                                value={`${p.name}-${p.id}`}
                                                 onSelect={() => {
                                                     setPersonA(p.id);
                                                     setOpenA(false);
@@ -78,7 +79,7 @@ export function CalculatorClient({ people }: { people: PersonSimple[] }) {
                                 <SearchIcon className="ml-2 size-4 opacity-50" />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[300px] p-0">
+                        <PopoverContent className="w-[400px] p-0">
                             <Command>
                                 <CommandInput placeholder="Cari nama..." />
                                 <CommandList>
@@ -87,7 +88,7 @@ export function CalculatorClient({ people }: { people: PersonSimple[] }) {
                                         {people.map(p => (
                                             <CommandItem
                                                 key={p.id}
-                                                value={p.name}
+                                                value={`${p.name}-${p.id}`}
                                                 onSelect={() => {
                                                     setPersonB(p.id);
                                                     setOpenB(false);
