@@ -37,19 +37,19 @@ async function getPeopleData(): Promise<PersonColumn[]> {
         orderBy: { name: "asc" }
     })
 
-    return persons.map(p => {
+    return persons.map((p: any) => {
         // Find parents
-        const parentsList = p.originFamily?.partners.map(part => part.person.name) || []
-        const fatherId = p.originFamily?.partners.find(part => part.role === "HUSBAND")?.personId || undefined
-        const motherId = p.originFamily?.partners.find(part => part.role === "WIFE")?.personId || undefined
+        const parentsList = p.originFamily?.partners.map((part: any) => part.person.name) || []
+        const fatherId = p.originFamily?.partners.find((part: any) => part.role === "HUSBAND")?.personId || undefined
+        const motherId = p.originFamily?.partners.find((part: any) => part.role === "WIFE")?.personId || undefined
 
         // Find partners
-        const partnerNames = p.partnerships.flatMap(part =>
+        const partnerNames = p.partnerships.flatMap((part: any) =>
             part.family.partners
-                .filter(fp => fp.personId !== p.id)
-                .map(fp => fp.person.name)
+                .filter((fp: any) => fp.personId !== p.id)
+                .map((fp: any) => fp.person.name)
         )
-        const spouseId = p.partnerships[0]?.family.partners.find(fp => fp.personId !== p.id)?.personId || undefined
+        const spouseId = p.partnerships[0]?.family.partners.find((fp: any) => fp.personId !== p.id)?.personId || undefined
 
         return {
             id: p.id,
