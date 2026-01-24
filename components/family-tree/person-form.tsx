@@ -289,7 +289,7 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
 
             {/* Data Kelahiran */}
             <div className="border-t pt-4 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4">
 
                     <div className="space-y-2">
                         <Label>Provinsi</Label>
@@ -323,7 +323,7 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label>Tanggal Lahir</Label>
                         <Input type="date" {...form.register("dateOfBirth")} className="h-9" />
