@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Enum definitions
+// ============================================
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum PartnerRole {
+  HUSBAND
+  WIFE
+  PARTNER
+}
+
+enum MediaType {
+  PHOTO
+  DOCUMENT
+  VIDEO
+  AUDIO
+}
+
+// ============================================
+// Main models
+// ============================================
+
+/// Individual person in the family tree
+model Person {
+  id           String    @id @default(cuid())
+  name         String
+  bio          String?
+  gender       Gender?
+  dateOfBirth  DateTime?
+  dateOfDeath  DateTime?
+  placeOfBirth String?
+  placeOfDeath String?
+  photoUrl     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // This person was born into this family (biological or adoptive origin)
+  originFamily   Family? @relation("ChildOf", fields: [originFamilyId], references: [id])
+  originFamilyId String?
+
+  // Partnerships this person is part of (as spouse/partner)
+  partnerships Partnership[]
+
+  // Media attached to this person
+  media Media[]
+
+  // Events in this person's life
+  events Event[]
+
+  @@index([name])
+  @@index([dateOfBirth])
+}
+
+/// Family unit - represents a union between partners and their children
+model Family {
+  id        String    @id @default(cuid())
+  startDate DateTime?
+  endDate   DateTime?
+  notes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Partners in this family (many-to-many through Partnership)
+  partners Partnership[]
+
+  // Children born into or adopted into this family
+  children Person[] @relation("ChildOf")
+}
+
+/// Explicit join table for Person <-> Family (Many-to-Many with metadata)
+model Partnership {
+  id        String       @id @default(cuid())
+  personId  String
+  familyId  String
+  role      PartnerRole
+  startDate DateTime?
+  endDate   DateTime?
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@unique([personId, familyId])
+}
+
+/// Media files (photos, documents, videos, audio) attached to a person
+model Media {
+  id        String    @id @default(cuid())
+  url       String
+  type      MediaType
+  caption   String?
+  date      DateTime?
+  personId  String?
+
+  createdAt DateTime @default(now())
+
+  person Person? @relation(fields: [personId], references: [id], onDelete: SetNull)
+
+  @@index([personId])
+}
+
+/// Life events for a person (birth, marriage, death, milestones)
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  date        DateTime?
+  location    String?
+  personId    String?
+
+  createdAt DateTime @default(now())
+
+  person Person? @relation(fields: [personId], references: [id], onDelete: SetNull)
+
+  @@index([personId])
+  @@index([date])
+}
