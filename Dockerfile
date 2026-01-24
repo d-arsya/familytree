@@ -12,8 +12,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma Client
-# RUN npx prisma generate
+# Generate Prisma Client (Dummy URL for build step to satisfy types)
+ENV DATABASE_URL="postgresql://postgres:postgres@localhost:5432/placeholder"
+RUN npx prisma generate
 
 # Build Next.js
 ENV NEXT_TELEMETRY_DISABLED 1
@@ -32,7 +33,7 @@ RUN adduser --system --uid 1001 nextjs
 # Copy essential files
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
-# COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma ./prisma
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
