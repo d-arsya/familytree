@@ -15,8 +15,26 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Modern Family Tree",
-  description: "Platform silsilah keluarga modern yang dinamis dan kolaboratif",
+  title: "Keluarga Besar Haji Abdul Salam & Siti Khodijah - Trah Wonogiri",
+  description: "Silsilah dan kisah perjalanan keluarga besar H. Abdul Salam (Jokariyo) dan Siti Khodijah (Kadikem) dari Wonogiri. Merawat akar, menyambung silaturahmi. Platform digital untuk mendokumentasikan warisan leluhur dan mempererat hubungan keluarga.",
+  keywords: ["Silsilah Keluarga", "Family Tree", "Wonogiri", "Haji Abdul Salam", "Siti Khodijah", "Jokariyo", "Kadikem", "Trah Wonogiri", "Genealogi Jawa"],
+  authors: [{ name: "Keluarga Besar Wonogiri" }],
+  openGraph: {
+    title: "Keluarga Besar Haji Abdul Salam & Siti Khodijah",
+    description: "Merawat akar, menyambung silaturahmi. Dokumentasi digital silsilah keluarga besar dari Wonogiri.",
+    type: "website",
+    locale: "id_ID",
+    siteName: "Trah Wonogiri Family Tree",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Keluarga Besar Haji Abdul Salam & Siti Khodijah",
+    description: "Silsilah digital keluarga besar Wonogiri.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  }
 };
 
 export default function RootLayout({

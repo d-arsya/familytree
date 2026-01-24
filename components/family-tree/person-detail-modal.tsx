@@ -68,7 +68,7 @@ export function PersonDetailModal({
                 <DialogPrimitive.Content
                     className={cn(
                         "fixed top-[50%] left-[50%] z-50 translate-x-[-50%] translate-y-[-50%]",
-                        "w-full max-w-lg max-h-[90vh] overflow-y-auto",
+                        "w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto", // Responsive width
                         "rounded-xl border bg-card shadow-2xl",
                         "data-[state=open]:animate-in data-[state=closed]:animate-out",
                         "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
@@ -114,8 +114,8 @@ export function PersonDetailModal({
                     </div>
 
                     {/* Content */}
-                    <div className="p-6 space-y-4">
-                        <div className="flex items-start justify-between gap-4">
+                    <div className="p-4 sm:p-6 space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                             <div>
                                 <h2 className="text-xl font-bold">{person.name}</h2>
                                 <div className="flex items-center gap-2 mt-1">
@@ -136,6 +136,7 @@ export function PersonDetailModal({
                                     size="sm"
                                     variant="outline"
                                     onClick={() => onEdit(person.id)}
+                                    className="self-end sm:self-auto w-full sm:w-auto"
                                 >
                                     <PencilIcon className="size-4 mr-1" />
                                     Edit
@@ -186,7 +187,7 @@ export function PersonDetailModal({
                         </div>
 
                         {/* Relations Summary */}
-                        <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t">
                             <div className="space-y-2">
                                 <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pasangan</h4>
                                 <div className="space-y-1">

@@ -2,12 +2,11 @@ export const dynamic = "force-dynamic"
 import Link from "next/link"
 import { Suspense } from "react"
 import { prisma } from "@/lib/prisma"
-import { TreesIcon, ArrowLeftIcon, GalleryHorizontalEndIcon, UsersIcon } from "lucide-react"
+import { TreesIcon, ArrowLeftIcon, GalleryHorizontalEndIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { AddPersonDialog } from "@/components/family-tree/add-person-dialog"
 import { HorizontalTree } from "@/components/family-tree/horizontal-tree"
 
 async function getTreeData() {
@@ -76,12 +75,14 @@ async function TreeContent() {
                         <UsersIcon className="size-8 text-primary" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-semibold">Belum Ada Anggota Keluarga</h3>
+                        <h3 className="text-lg font-semibold">Belum Ada Data</h3>
                         <p className="text-muted-foreground text-sm mt-1">
-                            Mulai dengan menambahkan anggota keluarga pertama ke pohon Anda.
+                            Silakan tambahkan data melalui halaman utama.
                         </p>
                     </div>
-                    <AddPersonDialog />
+                    <Button asChild>
+                        <Link href="/tree">Kembali ke Editor</Link>
+                    </Button>
                 </CardContent>
             </Card>
         )
@@ -99,38 +100,26 @@ async function TreeContent() {
     )
 }
 
-export default function TreePage() {
+export default function HorizontalTreePage() {
     return (
         <div className="h-screen flex flex-col bg-background">
-            {/* Header - Interactive & Responsive */}
-            <header className="flex-none z-40 glass border-b px-3 sm:px-4 py-2 flex items-center justify-between">
-                <div className="flex items-center gap-2 sm:gap-4">
+            {/* Header - Glassmorphism & Responsive */}
+            <header className="flex-none z-40 glass border-b px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-2 md:gap-4">
                     <Button variant="ghost" size="icon" asChild title="Back">
-                        <Link href="/">
+                        <Link href="/tree">
                             <ArrowLeftIcon className="size-5" />
                         </Link>
                     </Button>
                     <div className="flex items-center gap-2">
                         <GalleryHorizontalEndIcon className="size-5 text-primary" />
-                        <span className="font-semibold text-sm sm:text-base hidden sm:inline-block">Horizontal View</span>
-                        <span className="font-semibold text-sm sm:hidden">Horizontal</span>
-                    </div>
-                </div>
-                <div className="flex items-center gap-1 sm:gap-2">
-                    <Button variant="outline" size="sm" asChild className="px-2 sm:px-3">
-                        <Link href="/tree/vertical">
-                            <TreesIcon className="size-4 sm:mr-2" />
-                            <span className="hidden sm:inline">Vertical Editor</span>
-                        </Link>
-                    </Button>
-
-                    <div className="scale-90 sm:scale-100">
-                        <AddPersonDialog />
+                        <span className="font-semibold text-sm md:text-base hidden sm:inline-block">Horizontal View</span>
+                        <span className="font-semibold text-sm md:text-base sm:hidden">Horizontal</span>
                     </div>
                 </div>
             </header>
 
-            {/* Main Content - Full */}
+            {/* Main Content */}
             <main className="flex-1 relative overflow-hidden">
                 <Suspense fallback={<TreeSkeleton />}>
                     <TreeContent />
@@ -139,3 +128,6 @@ export default function TreePage() {
         </div>
     )
 }
+
+// Helper icon for empty state
+import { UsersIcon } from "lucide-react"

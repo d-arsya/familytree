@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AddPersonDialog } from "@/components/family-tree/add-person-dialog"
-import { HorizontalTree } from "@/components/family-tree/horizontal-tree"
+import { StaticTree } from "@/components/family-tree/static-tree"
 
 async function getTreeData() {
     const persons = await prisma.person.findMany({
@@ -58,8 +58,8 @@ function TreeSkeleton() {
     return (
         <div className="w-full h-full flex items-center justify-center bg-muted/10">
             <div className="text-center space-y-4">
-                <GalleryHorizontalEndIcon className="size-16 text-muted-foreground/20 mx-auto animate-pulse" />
-                <p className="text-muted-foreground animate-pulse">Memuat Peta Horizontal...</p>
+                <TreesIcon className="size-16 text-muted-foreground/20 mx-auto animate-pulse" />
+                <p className="text-muted-foreground animate-pulse">Memuat Peta Vertikal...</p>
             </div>
         </div>
     )
@@ -90,7 +90,7 @@ async function TreeContent() {
     return (
         <div className="w-full h-full relative">
             <div className="absolute inset-0 w-full h-full">
-                <HorizontalTree
+                <StaticTree
                     persons={JSON.parse(JSON.stringify(persons))}
                     families={JSON.parse(JSON.stringify(families))}
                 />
@@ -99,28 +99,28 @@ async function TreeContent() {
     )
 }
 
-export default function TreePage() {
+export default function VerticalTreePage() {
     return (
         <div className="h-screen flex flex-col bg-background">
             {/* Header - Interactive & Responsive */}
             <header className="flex-none z-40 glass border-b px-3 sm:px-4 py-2 flex items-center justify-between">
                 <div className="flex items-center gap-2 sm:gap-4">
                     <Button variant="ghost" size="icon" asChild title="Back">
-                        <Link href="/">
+                        <Link href="/tree">
                             <ArrowLeftIcon className="size-5" />
                         </Link>
                     </Button>
                     <div className="flex items-center gap-2">
-                        <GalleryHorizontalEndIcon className="size-5 text-primary" />
-                        <span className="font-semibold text-sm sm:text-base hidden sm:inline-block">Horizontal View</span>
-                        <span className="font-semibold text-sm sm:hidden">Horizontal</span>
+                        <TreesIcon className="size-5 text-primary" />
+                        <span className="font-semibold text-sm sm:text-base hidden sm:inline-block">Vertical Editor</span>
+                        <span className="font-semibold text-sm sm:hidden">Editor</span>
                     </div>
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2">
                     <Button variant="outline" size="sm" asChild className="px-2 sm:px-3">
-                        <Link href="/tree/vertical">
-                            <TreesIcon className="size-4 sm:mr-2" />
-                            <span className="hidden sm:inline">Vertical Editor</span>
+                        <Link href="/tree">
+                            <GalleryHorizontalEndIcon className="size-4 sm:mr-2" />
+                            <span className="hidden sm:inline">Horizontal View</span>
                         </Link>
                     </Button>
 
