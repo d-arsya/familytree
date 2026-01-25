@@ -15,8 +15,10 @@ type PersonSimple = {
 
 // Stats fetcher
 import { prisma } from "@/lib/prisma"
+import { unstable_noStore } from "next/cache"
 
 async function getData() {
+    unstable_noStore()
     const allPeople = await prisma.person.findMany({
         select: {
             id: true,
