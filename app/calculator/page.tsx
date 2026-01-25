@@ -91,7 +91,7 @@ export default async function CalculatorPage() {
                     </Button>
                     <div className="flex items-center gap-2">
                         <HeartIcon className="size-5 text-primary" />
-                        <span className="font-semibold text-lg">Cek Hubungan</span>
+                        <span className="font-semibold text-lg">Relationship Calculator</span>
                     </div>
                 </div>
             </header>

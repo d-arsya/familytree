@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { UserPlusIcon } from "lucide-react"
+import { UserPlusIcon, PlusIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -60,19 +60,19 @@ export function AddRelationDialog({
                 {trigger || (
                     <Button variant="outline" size="sm">
                         <UserPlusIcon className="size-4 mr-2" />
-                        Tambah Relasi
+                        Add Relation
                     </Button>
                 )}
             </DialogTrigger>
             <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
-                        {defaultRelation === "SPOUSE" && `Tambah Pasangan untuk ${personName}`}
-                        {defaultRelation === "CHILD" && `Tambah Anak untuk ${personName}`}
-                        {defaultRelation === "PARENT" && `Tambah Orang Tua untuk ${personName}`}
+                        {defaultRelation === "SPOUSE" && `Add Spouse for ${personName}`}
+                        {defaultRelation === "CHILD" && `Add Child for ${personName}`}
+                        {defaultRelation === "PARENT" && `Add Parent for ${personName}`}
                     </DialogTitle>
                     <DialogDescription>
-                        Lengkapi data anggota keluarga baru di bawah ini.
+                        Complete the information for the new family member below.
                     </DialogDescription>
                 </DialogHeader>
 

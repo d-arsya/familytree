@@ -43,7 +43,7 @@ export default async function GalleryPage() {
                     </Button>
                     <div className="flex items-center gap-2">
                         <ImageIcon className="size-5 text-primary" />
-                        <span className="font-semibold text-lg">Galeri Keluarga</span>
+                        <span className="font-semibold text-lg">Family Gallery</span>
                     </div>
                 </div>
             </header>
@@ -55,12 +55,12 @@ export default async function GalleryPage() {
                             <ImageIcon className="size-4" />
                         </div>
                         <p>
-                            Foto diambil secara otomatis dari profil anggota keluarga.
-                            Untuk menambahkan foto, buka <strong>Editor Pohon</strong>, pilih anggota keluarga, klik <strong>Edit</strong>, dan unggah foto profil.
+                            Photos are automatically pulled from family member profiles.
+                            To add a photo, open the <strong>Tree Editor</strong>, select a person, click <strong>Edit</strong>, and upload a profile photo.
                         </p>
                     </div>
                     <Button variant="outline" size="sm" asChild>
-                        <Link href="/tree/editor">Buka Editor Pohon</Link>
+                        <Link href="/tree/editor">Open Tree Editor</Link>
                     </Button>
                 </div>
 

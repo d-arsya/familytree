@@ -52,12 +52,12 @@ async function getStatistics() {
     return {
         totalPersons,
         livingDeceased: [
-            { name: "Hidup", value: livingCount, fill: "#10b981" }, // Emerald
-            { name: "Wafat", value: deceasedCount, fill: "#64748b" }, // Slate
+            { name: "Living", value: livingCount, fill: "#10b981" }, // Emerald
+            { name: "Deceased", value: deceasedCount, fill: "#64748b" }, // Slate
         ],
         genderDistribution: [
-            { name: "Laki-laki", value: totalMale, fill: "#3b82f6" }, // Blue
-            { name: "Perempuan", value: totalFemale, fill: "#ec4899" }, // Pink
+            { name: "Male", value: totalMale, fill: "#3b82f6" }, // Blue
+            { name: "Female", value: totalFemale, fill: "#ec4899" }, // Pink
         ],
         avgAge,
         oldestLiving
@@ -78,7 +78,7 @@ export default async function StatisticsPage() {
                     </Button>
                     <div className="flex items-center gap-2">
                         <BarChart3Icon className="size-5 text-primary" />
-                        <span className="font-semibold text-lg">Statistik Keluarga</span>
+                        <span className="font-semibold text-lg">Family Statistics</span>
                     </div>
                 </div>
             </header>
@@ -88,7 +88,7 @@ export default async function StatisticsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Total Anggota</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Total Members</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{stats.totalPersons}</div>
@@ -96,15 +96,15 @@ export default async function StatisticsPage() {
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Rata-rata Usia</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Average Age</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{stats.avgAge} <span className="text-xs font-normal text-muted-foreground">tahun</span></div>
+                            <div className="text-2xl font-bold">{stats.avgAge} <span className="text-xs font-normal text-muted-foreground">years</span></div>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Laki-laki</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Male</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-blue-500">{stats.genderDistribution[0].value}</div>
@@ -112,7 +112,7 @@ export default async function StatisticsPage() {
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Perempuan</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Female</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold text-pink-500">{stats.genderDistribution[1].value}</div>
@@ -130,8 +130,8 @@ export default async function StatisticsPage() {
                     {/* Oldest Living List */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Sesepuh Keluarga</CardTitle>
-                            <CardDescription>Anggota keluarga tertua yang masih hidup</CardDescription>
+                            <CardTitle>Family Elders</CardTitle>
+                            <CardDescription>Living members with the most years of wisdom</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
@@ -143,11 +143,11 @@ export default async function StatisticsPage() {
                                             </div>
                                             <span className="font-medium">{p.name}</span>
                                         </div>
-                                        <span className="text-sm text-muted-foreground">{p.age} tahun</span>
+                                        <span className="text-sm text-muted-foreground">{p.age} years old</span>
                                     </div>
                                 ))}
                                 {stats.oldestLiving.length === 0 && (
-                                    <p className="text-sm text-muted-foreground">Belum ada data tanggal lahir yang lengkap.</p>
+                                    <p className="text-sm text-muted-foreground">No birth date records found.</p>
                                 )}
                             </div>
                         </CardContent>

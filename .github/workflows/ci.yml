@@ -3,7 +3,7 @@ name: Deploy FamilyTree to VPS
 on:
   push:
     branches:
-      - main
+      - public
 
 jobs:
   build:
@@ -46,7 +46,7 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
           script: |
-            cd /media/${{github.event.repository.name}}
+            cd /media/${{github.event.repository.name}}-public
             docker compose pull
             docker compose down
             docker compose up -d

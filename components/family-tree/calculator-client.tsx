@@ -31,19 +31,19 @@ export function CalculatorClient({ people }: { people: PersonSimple[] }) {
             <div className="grid gap-6">
                 {/* Person A Select */}
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Orang Pertama (A)</label>
+                    <label className="text-sm font-medium">First Person (A)</label>
                     <Popover open={openA} onOpenChange={setOpenA}>
                         <PopoverTrigger asChild>
                             <Button variant="outline" role="combobox" aria-expanded={openA} className="w-full justify-between">
-                                {personA ? getName(personA) : "Pilih Nama..."}
+                                {personA ? getName(personA) : "Select Name..."}
                                 <SearchIcon className="ml-2 size-4 opacity-50" />
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-[400px] p-0">
                             <Command>
-                                <CommandInput placeholder="Cari nama..." />
+                                <CommandInput placeholder="Search name..." />
                                 <CommandList>
-                                    <CommandEmpty>Tidak ditemukan.</CommandEmpty>
+                                    <CommandEmpty>No results found.</CommandEmpty>
                                     <CommandGroup>
                                         {people.map(p => (
                                             <CommandItem
@@ -66,24 +66,24 @@ export function CalculatorClient({ people }: { people: PersonSimple[] }) {
                 </div>
 
                 <div className="flex justify-center text-muted-foreground">
-                    <p className="text-xs uppercase tracking-widest font-bold">ingin mengecek hubungan dengan</p>
+                    <p className="text-xs uppercase tracking-widest font-bold">wants to check relationship with</p>
                 </div>
 
                 {/* Person B Select */}
                 <div className="space-y-2">
-                    <label className="text-sm font-medium">Orang Kedua (B)</label>
+                    <label className="text-sm font-medium">Second Person (B)</label>
                     <Popover open={openB} onOpenChange={setOpenB}>
                         <PopoverTrigger asChild>
                             <Button variant="outline" role="combobox" aria-expanded={openB} className="w-full justify-between">
-                                {personB ? getName(personB) : "Pilih Nama..."}
+                                {personB ? getName(personB) : "Select Name..."}
                                 <SearchIcon className="ml-2 size-4 opacity-50" />
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-[400px] p-0">
                             <Command>
-                                <CommandInput placeholder="Cari nama..." />
+                                <CommandInput placeholder="Search name..." />
                                 <CommandList>
-                                    <CommandEmpty>Tidak ditemukan.</CommandEmpty>
+                                    <CommandEmpty>No results found.</CommandEmpty>
                                     <CommandGroup>
                                         {people.map(p => (
                                             <CommandItem
@@ -107,7 +107,7 @@ export function CalculatorClient({ people }: { people: PersonSimple[] }) {
 
                 <Button size="lg" onClick={handleCalculate} disabled={!personA || !personB} className="w-full">
                     <CalculatorIcon className="mr-2 size-5" />
-                    Cek Hubungan
+                    Calculate Relationship
                 </Button>
             </div>
 
@@ -115,20 +115,20 @@ export function CalculatorClient({ people }: { people: PersonSimple[] }) {
             {result && (
                 <Card className="bg-primary/5 border-primary/20 animate-in fade-in zoom-in-95 duration-300">
                     <CardHeader className="text-center pb-2">
-                        <CardDescription>Hubungan antara {getName(personA)} dan {getName(personB)}</CardDescription>
+                        <CardDescription>Relationship between {getName(personA)} and {getName(personB)}</CardDescription>
                         <CardTitle className="text-2xl font-bold text-primary">{result.relation}</CardTitle>
                     </CardHeader>
                     {result.commonAncestorName && (
                         <CardContent className="text-center">
                             <p className="text-sm text-muted-foreground">
-                                Leluhur Bersama: <span className="font-semibold text-foreground">{result.commonAncestorName}</span>
+                                Common Ancestor: <span className="font-semibold text-foreground">{result.commonAncestorName}</span>
                             </p>
                         </CardContent>
                     )}
                     {!result.commonAncestorName && result.relation !== "Diri Sendiri" && (
                         <CardContent className="text-center">
                             <p className="text-sm text-yellow-600">
-                                Tidak ditemukan jalur hubungan darah langsung yang tercatat.
+                                No direct blood relationship found in the records.
                             </p>
                         </CardContent>
                     )}

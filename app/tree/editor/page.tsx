@@ -59,7 +59,7 @@ function TreeSkeleton() {
         <div className="w-full h-full flex items-center justify-center bg-muted/10">
             <div className="text-center space-y-4">
                 <TreesIcon className="size-16 text-muted-foreground/20 mx-auto animate-pulse" />
-                <p className="text-muted-foreground animate-pulse">Memuat Peta Vertikal...</p>
+                <p className="text-muted-foreground animate-pulse">Loading Editor...</p>
             </div>
         </div>
     )
@@ -76,9 +76,9 @@ async function TreeContent() {
                         <UsersIcon className="size-8 text-primary" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-semibold">Belum Ada Anggota Keluarga</h3>
+                        <h3 className="text-lg font-semibold">No Members Recorded</h3>
                         <p className="text-muted-foreground text-sm mt-1">
-                            Mulai dengan menambahkan anggota keluarga pertama ke pohon Anda.
+                            Start building your family heritage tree by adding the first member.
                         </p>
                     </div>
                     <AddPersonDialog />
@@ -113,7 +113,7 @@ export default function EditorPage() {
                     </Button>
                     <div className="flex items-center gap-2">
                         <TreesIcon className="size-5 text-primary" />
-                        <span className="font-semibold text-sm sm:text-base hidden sm:inline-block">Editor Pohon</span>
+                        <span className="font-semibold text-sm sm:text-base hidden sm:inline-block">Tree Editor</span>
                         <span className="font-semibold text-sm sm:hidden">Editor</span>
                     </div>
                 </div>

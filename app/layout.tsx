@@ -15,21 +15,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Keluarga Besar Haji Abdul Salam & Siti Khodijah - Trah Wonogiri",
-  description: "Silsilah dan kisah perjalanan keluarga besar H. Abdul Salam (Jokariyo) dan Siti Khodijah (Kadikem) dari Wonogiri. Merawat akar, menyambung silaturahmi. Platform digital untuk mendokumentasikan warisan leluhur dan mempererat hubungan keluarga.",
-  keywords: ["Silsilah Keluarga", "Family Tree", "Wonogiri", "Haji Abdul Salam", "Siti Khodijah", "Jokariyo", "Kadikem", "Trah Wonogiri", "Genealogi Jawa"],
-  authors: [{ name: "Keluarga Besar Wonogiri" }],
+  title: "Family Heritage - Digital Genealogy & Family Tree Archive",
+  description: "Preserve and explore your collective family heritage. A digital platform for documenting ancestors, connecting generations, and celebrating the legacy of our families.",
+  keywords: ["Family Tree", "Genealogy", "Family Heritage", "Ancestor Archive", "Connections", "Digital History", "Lineage"],
+  authors: [{ name: "Family Heritage Archive" }],
   openGraph: {
-    title: "Keluarga Besar Haji Abdul Salam & Siti Khodijah",
-    description: "Merawat akar, menyambung silaturahmi. Dokumentasi digital silsilah keluarga besar dari Wonogiri.",
+    title: "Family Heritage Archive",
+    description: "Preserving the past, connecting the future. Discovery your family lineage in our digital archive.",
     type: "website",
-    locale: "id_ID",
-    siteName: "Trah Wonogiri Family Tree",
+    locale: "en_US",
+    siteName: "Family Heritage Tree",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Keluarga Besar Haji Abdul Salam & Siti Khodijah",
-    description: "Silsilah digital keluarga besar Wonogiri.",
+    title: "Family Heritage Archive",
+    description: "Discover and document your family's digital genealogy.",
   },
   robots: {
     index: true,
@@ -43,7 +43,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >

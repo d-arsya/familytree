@@ -23,7 +23,7 @@ import { toast } from "sonner"
 
 // Extended schema to include all fields requested
 const formSchema = z.object({
-    name: z.string().min(1, "Nama harus diisi"),
+    name: z.string().min(1, "Name is required"),
     gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(),
     dateOfBirth: z.string().optional().nullable(), // input date returns string
     placeOfBirth: z.string().optional().nullable(),
@@ -158,7 +158,7 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
         const res = await uploadFile(formData)
 
         if (res.error) {
-            toast.error("Gagal mengupload foto")
+            toast.error("Failed to upload photo")
         } else if (res.url) {
             setPhotoPreview(res.url)
             form.setValue("photoUrl", res.url)
@@ -188,11 +188,11 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
             }
 
             if (result.error) {
-                toast.error(isEdit ? "Gagal mengubah data" : "Gagal menambahkan data")
+                toast.error(isEdit ? "Failed to update profile" : "Failed to add person")
                 return
             }
 
-            toast.success(isEdit ? "Data berhasil diubah" : "Data berhasil ditambahkan")
+            toast.success(isEdit ? "Profile updated successfully" : "Person added successfully")
             onSuccess?.()
         })
     }
@@ -200,8 +200,8 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-                <Label htmlFor="name">Nama Lengkap *</Label>
-                <Input id="name" {...form.register("name")} placeholder="Nama Lengkap" />
+                <Label htmlFor="name">Full Name *</Label>
+                <Input id="name" {...form.register("name")} placeholder="Full Name" />
                 {form.formState.errors.name && (
                     <p className="text-xs text-destructive">{form.formState.errors.name?.message}</p>
                 )}
@@ -209,24 +209,24 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label>Jenis Kelamin</Label>
+                    <Label>Gender</Label>
                     <Select
                         value={form.watch("gender") || undefined}
                         onValueChange={(val) => form.setValue("gender", val as any)}
                     >
                         <SelectTrigger className="h-9 w-full">
-                            <SelectValue placeholder="Pilih..." />
+                            <SelectValue placeholder="Select..." />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="MALE">Laki-laki</SelectItem>
-                            <SelectItem value="FEMALE">Perempuan</SelectItem>
+                            <SelectItem value="MALE">Male</SelectItem>
+                            <SelectItem value="FEMALE">Female</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
 
                 {/* File Upload */}
                 <div className="space-y-2">
-                    <Label>Foto</Label>
+                    <Label>Photo</Label>
                     <div className="flex items-center gap-2">
                         {photoPreview && (
                             // eslint-disable-next-line @next/next/no-img-element
@@ -240,15 +240,15 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
 
             {/* Relationship Section */}
             <div className="space-y-3 border-t pt-4">
-                <p className="text-sm font-medium">Hubungan Keluarga (Opsional)</p>
+                <p className="text-sm font-medium">Family Relationships (Optional)</p>
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label>Ayah</Label>
+                        <Label>Father</Label>
                         <Select
                             value={form.watch("fatherId") || undefined}
                             onValueChange={(v) => form.setValue("fatherId", v)}
                         >
-                            <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Pilih Ayah" /></SelectTrigger>
+                            <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Select Father" /></SelectTrigger>
                             <SelectContent>
                                 {getOlderPeople("MALE").map(p => (
                                     <SelectItem key={p.id} value={p.id}>{p.name} ({p.dateOfBirth ? p.dateOfBirth.substring(0, 4) : '?'})</SelectItem>
@@ -257,12 +257,12 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
                         </Select>
                     </div>
                     <div className="space-y-2">
-                        <Label>Ibu</Label>
+                        <Label>Mother</Label>
                         <Select
                             value={form.watch("motherId") || undefined}
                             onValueChange={(v) => form.setValue("motherId", v)}
                         >
-                            <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Pilih Ibu" /></SelectTrigger>
+                            <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Select Mother" /></SelectTrigger>
                             <SelectContent>
                                 {getOlderPeople("FEMALE").map(p => (
                                     <SelectItem key={p.id} value={p.id}>{p.name} ({p.dateOfBirth ? p.dateOfBirth.substring(0, 4) : '?'})</SelectItem>
@@ -272,12 +272,12 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <Label>Pasangan</Label>
+                    <Label>Spouse / Partner</Label>
                     <Select
                         value={form.watch("spouseId") || undefined}
                         onValueChange={(v) => form.setValue("spouseId", v)}
                     >
-                        <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Pilih Pasangan" /></SelectTrigger>
+                        <SelectTrigger className="h-9 w-full"><SelectValue placeholder="Select Spouse" /></SelectTrigger>
                         <SelectContent>
                             {getPotentialSpouses().map(p => (
                                 <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
@@ -287,15 +287,15 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
                 </div>
             </div>
 
-            {/* Data Kelahiran */}
+            {/* Birth Info */}
             <div className="border-t pt-4 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                     <div className="space-y-2">
-                        <Label>Provinsi</Label>
+                        <Label>Province (Origin)</Label>
                         <Select value={selectedProvinceBirth} onValueChange={setSelectedProvinceBirth}>
                             <SelectTrigger className="h-9 w-full">
-                                <SelectValue placeholder="Pilih Provinsi..." />
+                                <SelectValue placeholder="Select Province..." />
                             </SelectTrigger>
                             <SelectContent>
                                 {Object.keys(citiesData).sort().map((prov, i) => (
@@ -305,14 +305,14 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
                         </Select>
                     </div>
                     <div className="space-y-2">
-                        <Label>Alamat (Kota)</Label>
+                        <Label>City (Origin)</Label>
                         <Select
                             value={form.watch("placeOfBirth") || ""}
                             onValueChange={(val) => form.setValue("placeOfBirth", val)}
                             disabled={!selectedProvinceBirth}
                         >
                             <SelectTrigger className="h-9 w-full">
-                                <SelectValue placeholder="Pilih Kota..." />
+                                <SelectValue placeholder="Select City..." />
                             </SelectTrigger>
                             <SelectContent>
                                 {(citiesData[selectedProvinceBirth] || []).sort().map((city, i) => (
@@ -323,32 +323,32 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label>Tanggal Lahir</Label>
+                        <Label>Birth Date</Label>
                         <Input type="date" {...form.register("dateOfBirth")} className="h-9" />
                     </div>
                     <div className="space-y-2">
-                        <Label>Tanggal Wafat</Label>
+                        <Label>Death Date (Optional)</Label>
                         <Input type="date" {...form.register("dateOfDeath")} className="h-9" />
                     </div>
                 </div>
             </div>
 
             <div className="space-y-2 border-t pt-4">
-                <Label>Biografi Singkat</Label>
-                <Textarea {...form.register("bio")} placeholder="Catatan tambahan..." />
+                <Label>Short Biography</Label>
+                <Textarea {...form.register("bio")} placeholder="Additional notes, life story, etc..." />
             </div>
 
             <div className="flex justify-end gap-2 pt-4">
                 {onCancel && (
                     <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
-                        Batal
+                        Cancel
                     </Button>
                 )}
                 <Button type="submit" disabled={isPending}>
                     {isPending && <Loader2Icon className="mr-2 size-4 animate-spin" />}
-                    {isEdit ? "Simpan Perubahan" : "Tambah Orang"}
+                    {isEdit ? "Save Changes" : "Add Person"}
                 </Button>
             </div>
         </form>

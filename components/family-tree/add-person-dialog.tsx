@@ -28,15 +28,15 @@ export function AddPersonDialog({ trigger, onSuccess }: AddPersonDialogProps) {
                 {trigger || (
                     <Button>
                         <PlusIcon className="size-4 mr-2" />
-                        Tambah Anggota
+                        Add Member
                     </Button>
                 )}
             </DialogTrigger>
             <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Tambah Anggota Keluarga</DialogTitle>
+                    <DialogTitle>Add Family Member</DialogTitle>
                     <DialogDescription>
-                        Masukkan informasi dasar untuk anggota keluarga baru.
+                        Enter basic information for a new family member.
                     </DialogDescription>
                 </DialogHeader>
                 <PersonForm

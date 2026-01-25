@@ -4,7 +4,7 @@ import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { XIcon, UserIcon, CalendarIcon, MapPinIcon, PencilIcon, HeartIcon, BabyIcon } from "lucide-react"
 import { format } from "date-fns"
-import { id } from "date-fns/locale"
+import { enUS } from "date-fns/locale"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -42,7 +42,7 @@ export function PersonDetailModal({
 }: PersonDetailModalProps) {
     const formatDate = (date: Date | null) => {
         if (!date) return "-"
-        return format(date, "d MMMM yyyy", { locale: id })
+        return format(date, "d MMMM yyyy", { locale: enUS })
     }
 
     if (!person) return null
@@ -50,9 +50,9 @@ export function PersonDetailModal({
     const isDeceased = !!person.dateOfDeath
 
     const genderLabel = {
-        MALE: "Laki-laki",
-        FEMALE: "Perempuan",
-        OTHER: "Lainnya",
+        MALE: "Male",
+        FEMALE: "Female",
+        OTHER: "Other",
     }
 
     return (
@@ -126,7 +126,7 @@ export function PersonDetailModal({
                                     )}
                                     {isDeceased && (
                                         <Badge variant="secondary" className="text-xs">
-                                            Almarhum/ah
+                                            Deceased
                                         </Badge>
                                     )}
                                 </div>
@@ -155,7 +155,7 @@ export function PersonDetailModal({
                                         <CalendarIcon className="size-4" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium">Kelahiran</p>
+                                        <p className="text-sm font-medium">Birth</p>
                                         <p className="text-sm text-muted-foreground">
                                             {formatDate(new Date(person.dateOfBirth))}
                                             {person.placeOfBirth && ` • ${person.placeOfBirth}`}
@@ -170,7 +170,7 @@ export function PersonDetailModal({
                                         <CalendarIcon className="size-4" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium">Wafat</p>
+                                        <p className="text-sm font-medium">Death</p>
                                         <p className="text-sm text-muted-foreground">
                                             {formatDate(new Date(person.dateOfDeath))}
                                             {person.placeOfDeath && ` • ${person.placeOfDeath}`}
@@ -185,7 +185,7 @@ export function PersonDetailModal({
                                         <MapPinIcon className="size-4" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium">Alamat (Kota)</p>
+                                        <p className="text-sm font-medium">Address (City)</p>
                                         <p className="text-sm text-muted-foreground">
                                             {person.placeOfBirth}
                                         </p>
@@ -197,7 +197,7 @@ export function PersonDetailModal({
                         {/* Relations Summary */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t">
                             <div className="space-y-2">
-                                <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pasangan</h4>
+                                <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Spouse / Partner</h4>
                                 <div className="space-y-1">
                                     {(person as any).partnerships?.length > 0 ? (
                                         (person as any).partnerships.map((part: any, i: number) => {
@@ -212,7 +212,7 @@ export function PersonDetailModal({
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Anak-anak</h4>
+                                <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Children</h4>
                                 <div className="space-y-3">
                                     {(person as any).partnerships?.length > 0 ? (
                                         (person as any).partnerships.map((part: any, i: number) => {
@@ -221,7 +221,7 @@ export function PersonDetailModal({
                                             return (
                                                 <div key={i} className="space-y-1">
                                                     {(person as any).partnerships.length > 1 && (
-                                                        <p className="text-[10px] font-bold text-muted-foreground uppercase">Deng {otherParent?.name || '?'}</p>
+                                                        <p className="text-[10px] font-bold text-muted-foreground uppercase">With {otherParent?.name || '?'}</p>
                                                     )}
                                                     {part.family.children.map((child: any, ci: number) => (
                                                         <p key={ci} className="text-sm font-medium">{child.name}</p>
@@ -247,7 +247,7 @@ export function PersonDetailModal({
                                     trigger={
                                         <Button variant="outline" size="sm" className="flex-1 font-normal">
                                             <HeartIcon className="size-3 mr-2 text-pink-500" />
-                                            Pasangan
+                                            Spouse
                                         </Button>
                                     }
                                     onSuccess={() => onOpenChange(false)}
@@ -260,7 +260,7 @@ export function PersonDetailModal({
                                     trigger={
                                         <Button variant="outline" size="sm" className="flex-1 font-normal">
                                             <BabyIcon className="size-3 mr-2 text-blue-500" />
-                                            Anak
+                                            Child
                                         </Button>
                                     }
                                     onSuccess={() => onOpenChange(false)}

@@ -59,7 +59,7 @@ function TreeSkeleton() {
         <div className="w-full h-full flex items-center justify-center bg-muted/10">
             <div className="text-center space-y-4">
                 <GalleryHorizontalEndIcon className="size-16 text-muted-foreground/20 mx-auto animate-pulse" />
-                <p className="text-muted-foreground animate-pulse">Memuat Peta Horizontal...</p>
+                <p className="text-muted-foreground animate-pulse">Loading Visualization...</p>
             </div>
         </div>
     )
@@ -76,9 +76,9 @@ async function TreeContent() {
                         <UsersIcon className="size-8 text-primary" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-semibold">Belum Ada Anggota Keluarga</h3>
+                        <h3 className="text-lg font-semibold">No People Recorded Yet</h3>
                         <p className="text-muted-foreground text-sm mt-1">
-                            Mulai dengan menambahkan anggota keluarga pertama ke pohon Anda.
+                            Be the first to contribute to this family heritage by adding a family member.
                         </p>
                     </div>
                     <AddPersonDialog />
@@ -112,8 +112,8 @@ export default function TreePage() {
                     </Button>
                     <div className="flex items-center gap-2">
                         <GalleryHorizontalEndIcon className="size-5 text-primary" />
-                        <span className="font-semibold text-sm sm:text-base hidden sm:inline-block">Silsilah Keluarga</span>
-                        <span className="font-semibold text-sm sm:hidden">Silsilah</span>
+                        <span className="font-semibold text-sm sm:text-base hidden sm:inline-block">Family Heritage Tree</span>
+                        <span className="font-semibold text-sm sm:hidden">Tree</span>
                     </div>
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2">

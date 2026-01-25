@@ -59,8 +59,8 @@ async function getCalendarEvents() {
 
     // Group by Month
     const months = [
-        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
     ]
 
     const groupedEvents = months.map((monthName, index) => {
@@ -93,7 +93,7 @@ export default async function CalendarPage() {
                     </Button>
                     <div className="flex items-center gap-2">
                         <CalendarIcon className="size-5 text-primary" />
-                        <span className="font-semibold text-lg">Kalender Keluarga</span>
+                        <span className="font-semibold text-lg">Family Calendar</span>
                     </div>
                 </div>
             </header>
@@ -102,9 +102,9 @@ export default async function CalendarPage() {
                 {groups.length === 0 ? (
                     <div className="text-center space-y-4 py-20 text-muted-foreground">
                         <CalendarIcon className="size-16 mx-auto opacity-20" />
-                        <p>Belum ada data tanggal lahir atau wafat.</p>
+                        <p>No birth or death dates recorded yet.</p>
                         <Button variant="outline" asChild>
-                            <Link href="/tree">Tambah Data di Pohon</Link>
+                            <Link href="/tree">Add Data to Tree</Link>
                         </Button>
                     </div>
                 ) : (
@@ -152,8 +152,8 @@ export default async function CalendarPage() {
                                             </div>
                                             <p className="text-sm text-muted-foreground">
                                                 {event.type === 'BIRTHDAY'
-                                                    ? `Ulang Tahun ke-${event.age}`
-                                                    : `Memperingati ${event.yearsSince} tahun wafat`
+                                                    ? `${event.age}th Birthday`
+                                                    : `Remembrance: ${event.yearsSince} years since passing`
                                                 }
                                             </p>
                                         </div>

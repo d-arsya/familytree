@@ -326,7 +326,7 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
                 <div className="relative w-72 z-10">
                     <input
                         type="text"
-                        placeholder={isEditor ? "Cari untuk Edit..." : "Cari..."}
+                        placeholder={isEditor ? "Search to Edit..." : "Search..."}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full h-10 pl-10 pr-4 bg-background/80 backdrop-blur-md border rounded-xl shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
@@ -348,7 +348,7 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
                                     className="w-full px-4 py-3 text-left hover:bg-primary/10 border-b last:border-0 transition-colors"
                                 >
                                     <p className="text-sm font-semibold">{p.name}</p>
-                                    <p className="text-[10px] text-muted-foreground uppercase">{p.gender === 'MALE' ? 'Laki-laki' : 'Perempuan'}</p>
+                                    <p className="text-[10px] text-muted-foreground uppercase">{p.gender === 'MALE' ? 'Male' : 'Female'}</p>
                                 </button>
                             ))}
                         </div>
@@ -378,7 +378,7 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
                                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(d => (
                                     <SelectItem key={d} value={d.toString()}>Gen {d}</SelectItem>
                                 ))}
-                                <SelectItem value="100">Semua</SelectItem>
+                                <SelectItem value="100">All</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -406,7 +406,7 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
                 <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
                     <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
-                            <DialogTitle>Edit Anggota Keluarga</DialogTitle>
+                            <DialogTitle>Edit Profile</DialogTitle>
                         </DialogHeader>
                         <PersonForm
                             defaultValues={personToEdit}
