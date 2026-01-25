@@ -21,7 +21,7 @@ export default function HomePage() {
       {/* Navigation */}
       <nav className="relative z-10 container mx-auto px-6 py-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Image src="/logo.png" alt="Logo" width={36} height={36} />
+          <Image src="/logos.png" alt="Logo" width={36} height={36} />
           <span className="text-lg font-serif font-bold tracking-tight">Family Heritage</span>
         </div>
         <Button variant="ghost" className="font-medium" asChild>
