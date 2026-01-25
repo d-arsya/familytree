@@ -50,3 +50,7 @@ jobs:
             docker compose pull
             docker compose down
             docker compose up -d
+            cd /media/${{github.event.repository.name}}-public
+            docker compose pull
+            docker compose down
+            docker compose up -d
