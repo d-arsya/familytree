@@ -11,9 +11,12 @@ export async function uploadFile(formData: FormData) {
 
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-
-    // Docker volume friendly: public/uploads
-    const uploadDir = join(process.cwd(), "public", "uploads")
+    let uploadDir: string
+    if (process.env.NODE_ENV == 'development') {
+        uploadDir = join(process.cwd(), "public", "uploads")
+    } else {
+        uploadDir = join(process.cwd(), "uploads")
+    }
 
     try {
         await mkdir(uploadDir, { recursive: true })
