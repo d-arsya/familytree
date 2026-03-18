@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Suspense } from "react"
 import { prisma } from "@/lib/prisma"
 import { TreesIcon, ArrowLeftIcon, GalleryHorizontalEndIcon, UsersIcon } from "lucide-react"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -118,6 +119,7 @@ export default function EditorPage() {
                     </div>
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2">
+                    <ThemeToggle />
                     <Button variant="outline" size="sm" asChild className="px-2 sm:px-3">
                         <Link href="/tree">
                             <GalleryHorizontalEndIcon className="size-4 sm:mr-2" />

@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { TreesIcon, ArrowRightIcon, HeartIcon, BookOpenIcon, LeafIcon, ImageIcon, BarChart3Icon, CalendarIcon } from "lucide-react"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 export default function HomePage() {
   return (
@@ -25,9 +26,12 @@ export default function HomePage() {
           </div>
           <span className="text-lg font-serif font-bold tracking-tight">Keluarga Besar</span>
         </div>
-        <Button variant="ghost" className="font-medium" asChild>
-          <Link href="/tree">Buka Pohon Keluarga <ArrowRightIcon className="ml-2 size-4" /></Link>
-        </Button>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <ThemeToggle />
+          <Button variant="ghost" className="font-medium" asChild>
+            <Link href="/tree">Buka Pohon Keluarga <ArrowRightIcon className="ml-2 size-4" /></Link>
+          </Button>
+        </div>
       </nav>
 
       <main className="relative z-10 container mx-auto px-6 pt-12 pb-24">
