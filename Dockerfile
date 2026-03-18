@@ -20,7 +20,7 @@ ARG DATABASE_URL
 ENV DATABASE_URL=${DATABASE_URL}
 
 # generate prisma client
-RUN bunx prisma generate
+RUN bun run db:generate
 
 # build next
 ENV NEXT_TELEMETRY_DISABLED=1

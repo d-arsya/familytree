@@ -9,8 +9,5 @@ if [ -n "$DATABASE_URL" ]; then
   sleep 3
 fi
 
-echo "📦 Running migrations..."
-bunx prisma migrate deploy
-
 echo "✅ Starting app..."
 exec node server.js
