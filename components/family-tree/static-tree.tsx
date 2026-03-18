@@ -30,22 +30,41 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
 
     // Helper to find root
     const findRoot = () => {
-        const roots = persons.filter(p => !p.originFamilyId)
-        if (roots.length > 0) {
-            return roots.sort((a, b) => {
-                const dateA = a.dateOfBirth ? new Date(a.dateOfBirth).getTime() : Infinity
-                const dateB = b.dateOfBirth ? new Date(b.dateOfBirth).getTime() : Infinity
-                return dateA - dateB
-            })[0]
+        if (persons.length === 0) return null
+
+        // Start from the earliest-created person
+        const sorted = [...persons].sort((a, b) => {
+            const dateA = (a as any).createdAt ? new Date((a as any).createdAt).getTime() : Infinity
+            const dateB = (b as any).createdAt ? new Date((b as any).createdAt).getTime() : Infinity
+            return dateA - dateB
+        })
+        let candidate = sorted[0]
+
+        // Walk upward to find the top-most ancestor
+        const visited = new Set<string>()
+        while (candidate) {
+            visited.add((candidate as any).id)
+            if (!(candidate as any).originFamilyId) break
+
+            const originFam = families.find(f => f.id === (candidate as any).originFamilyId)
+            if (!originFam || !originFam.partners || originFam.partners.length === 0) break
+
+            // Move upward to parent
+            const parentPartner = originFam.partners[0]
+            const parent = persons.find(p => (p as any).id === parentPartner.personId)
+
+            if (!parent || visited.has((parent as any).id)) break
+            candidate = parent
         }
-        return persons[0]
+
+        return candidate
     }
 
     // Search Logic
     React.useEffect(() => {
         if (searchQuery.length > 2) {
             const query = searchQuery.toLowerCase()
-            const filtered = persons.filter(p => p.name.toLowerCase().includes(query))
+            const filtered = (persons as any[]).filter(p => p.name.toLowerCase().includes(query))
             setSearchResults(filtered)
         } else {
             setSearchResults([])
@@ -77,9 +96,9 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
         // Build adjacency list
         const childrenMap = new Map<string, string[]>()
         families.forEach(fam => {
-            const parentIds = fam.partners.map(p => p.personId)
-            const childIds = fam.children.map(c => c.id)
-            parentIds.forEach(pid => {
+            const parentIds = fam.partners.map((p: any) => p.personId)
+            const childIds = fam.children.map((c: any) => c.id)
+            parentIds.forEach((pid: any) => {
                 const current = childrenMap.get(pid) || []
                 childrenMap.set(pid, [...current, ...childIds])
             })
@@ -189,23 +208,23 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
                 if (p) { setSelectedPerson(p); setModalOpen(true); }
             })
 
-        nodeSelection.each(function (d: any) {
-            const p = persons.find(per => per.id === d.data.name)
-            renderCardContent(d3.select(this as SVGGElement), p, (d.parent?.data as any)?.name)
+        nodeSelection.each(function (this: any, d: any) {
+            const p = (persons as any[]).find(per => per.id === d.data.name)
+            renderCardContent(d3.select(this), p, (d.parent?.data as any)?.name)
         })
 
         // Render Partners
-        nodeSelection.each(function (d: any) {
-            const p = persons.find(per => per.id === d.data.name)
+        nodeSelection.each(function (this: any, d: any) {
+            const p = (persons as any[]).find(per => per.id === d.data.name)
             if (!p || !p.partnerships) return
 
             const partnersList: any[] = []
-            p.partnerships.forEach(part => {
+            p.partnerships.forEach((part: any) => {
                 const family = families.find(f => f.id === part.familyId)
                 if (!family) return
-                family.partners.forEach(fp => {
+                family.partners.forEach((fp: any) => {
                     if (fp.personId !== p.id) {
-                        const partner = persons.find(per => per.id === fp.personId)
+                        const partner = (persons as any[]).find(per => per.id === fp.personId)
                         if (partner) partnersList.push(partner)
                     }
                 })
@@ -242,8 +261,8 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
                     // Focus primary parent if it's a partner
                     const nodes = rootNode.descendants()
                     for (const d of nodes) {
-                        const p = persons.find(per => per.id === (d.data as any).name)
-                        if (p?.partnerships?.some(part => families.find(f => f.id === part.familyId)?.partners.some(fp => fp.personId === id))) {
+                        const p = (persons as any[]).find(per => per.id === (d.data as any).name)
+                        if (p?.partnerships?.some((part: any) => families.find(f => f.id === part.familyId)?.partners.some((fp: any) => fp.personId === id))) {
                             focusOn(d.x, d.y)
                             break
                         }

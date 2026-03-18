@@ -44,18 +44,39 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
     const [zoomRef, setZoomRef] = React.useState<any>(null)
 
     const findRoot = () => {
-        const roots = persons.filter(p => !p.originFamilyId)
-        if (roots.length > 0) {
-            return roots.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())[0]
+        if (persons.length === 0) return null
+
+        // Start from the earliest-created person
+        const sorted = [...persons].sort((a, b) =>
+            new Date((a as any).createdAt).getTime() - new Date((b as any).createdAt).getTime()
+        )
+        let candidate = sorted[0]
+
+        // Walk upward to find the top-most ancestor
+        const visited = new Set<string>()
+        while (candidate) {
+            visited.add((candidate as any).id)
+            if (!(candidate as any).originFamilyId) break
+
+            const originFam = families.find(f => f.id === (candidate as any).originFamilyId)
+            if (!originFam || !originFam.partners || originFam.partners.length === 0) break
+
+            // Move to the first partner found in the origin family
+            const parentPartner = originFam.partners[0]
+            const parent = persons.find(p => (p as any).id === parentPartner.personId)
+
+            if (!parent || visited.has((parent as any).id)) break
+            candidate = parent
         }
-        return persons[0]
+
+        return candidate
     }
 
     // Search Logic
     React.useEffect(() => {
         if (searchQuery.length > 2) {
             const query = searchQuery.toLowerCase()
-            const filtered = persons.filter(p => p.name.toLowerCase().includes(query))
+            const filtered = (persons as any[]).filter(p => p.name.toLowerCase().includes(query))
             setSearchResults(filtered)
         } else {
             setSearchResults([])
@@ -84,11 +105,11 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
         // Build adjacency list
         const childrenMap = new Map<string, string[]>()
         families.forEach(fam => {
-            const parentIds = fam.partners.map(p => p.personId)
-            const childList = fam.children.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-            const childIds = childList.map(c => c.id)
+            const parentIds = fam.partners.map((p: any) => p.personId)
+            const childList = fam.children.sort((a, b) => new Date((a as any).createdAt).getTime() - new Date((b as any).createdAt).getTime())
+            const childIds = childList.map((c: any) => c.id)
 
-            parentIds.forEach(pid => {
+            parentIds.forEach((pid: any) => {
                 const current = childrenMap.get(pid) || []
                 childrenMap.set(pid, [...current, ...childIds])
             })
@@ -130,7 +151,7 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
                 if (n.depth === startDepth) {
                     nodesAtStart.push(n)
                 } else if (n.children) {
-                    n.children.forEach(findAtDepth)
+                    n.children.forEach((c: any) => findAtDepth(c))
                 }
             }
             findAtDepth(rootData)
@@ -249,24 +270,24 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
                 if (p) { setSelectedPerson(p); setModalOpen(true); }
             })
 
-        nodeSelection.each(function (d: any) {
-            const p = persons.find(per => per.id === d.data.name)
-            renderCardContent(d3.select(this as SVGGElement), p)
+        nodeSelection.each(function (this: any, d: any) {
+            const p = (persons as any[]).find(per => per.id === d.data.name)
+            renderCardContent(d3.select(this), p)
         })
 
         // Render Partners - Vertical Gap Issue
         // If we reduce node gap, partners must be closer too.
-        nodeSelection.each(function (d: any) {
-            const p = persons.find(per => per.id === d.data.name)
+        nodeSelection.each(function (this: any, d: any) {
+            const p = (persons as any[]).find(per => per.id === d.data.name)
             if (!p || !p.partnerships) return
 
             const partnersList: any[] = []
-            p.partnerships.forEach(part => {
+            p.partnerships.forEach((part: any) => {
                 const family = families.find(f => f.id === part.familyId)
                 if (!family) return
-                family.partners.forEach(fp => {
+                family.partners.forEach((fp: any) => {
                     if (fp.personId !== p.id) {
-                        const partner = persons.find(per => per.id === fp.personId)
+                        const partner = (persons as any[]).find(per => per.id === fp.personId)
                         if (partner) partnersList.push(partner)
                     }
                 })
