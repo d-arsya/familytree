@@ -5,6 +5,7 @@ import * as d3 from "d3"
 import { useTheme } from "next-themes"
 import { Person, Family, Partnership } from "@prisma/client"
 import { PersonDetailModal } from "./person-detail-modal"
+import { findRoots } from "@/lib/tree-utils"
 
 // Types
 interface TreePerson extends Person {
@@ -27,38 +28,6 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
     const [modalOpen, setModalOpen] = React.useState(false)
     const [searchQuery, setSearchQuery] = React.useState("")
     const [searchResults, setSearchResults] = React.useState<any[]>([])
-
-    // Helper to find root
-    const findRoot = () => {
-        if (persons.length === 0) return null
-
-        // Start from the earliest-created person
-        const sorted = [...persons].sort((a, b) => {
-            const dateA = (a as any).createdAt ? new Date((a as any).createdAt).getTime() : Infinity
-            const dateB = (b as any).createdAt ? new Date((b as any).createdAt).getTime() : Infinity
-            return dateA - dateB
-        })
-        let candidate = sorted[0]
-
-        // Walk upward to find the top-most ancestor
-        const visited = new Set<string>()
-        while (candidate) {
-            visited.add((candidate as any).id)
-            if (!(candidate as any).originFamilyId) break
-
-            const originFam = families.find(f => f.id === (candidate as any).originFamilyId)
-            if (!originFam || !originFam.partners || originFam.partners.length === 0) break
-
-            // Move upward to parent
-            const parentPartner = originFam.partners[0]
-            const parent = persons.find(p => (p as any).id === parentPartner.personId)
-
-            if (!parent || visited.has((parent as any).id)) break
-            candidate = parent
-        }
-
-        return candidate
-    }
 
     // Search Logic
     React.useEffect(() => {
@@ -90,9 +59,6 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
             })
         svg.call(zoom)
 
-        const rootPerson = findRoot()
-        if (!rootPerson) return
-
         // Build adjacency list
         const childrenMap = new Map<string, string[]>()
         families.forEach(fam => {
@@ -116,9 +82,24 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
             return node
         }
 
-        const rootData = buildHierarchy(rootPerson.id)
+        const rootsList = findRoots(persons, families)
+        if (rootsList.length === 0) return
+
+        const rootNodesData = rootsList.map(root => buildHierarchy(root.id)).filter(Boolean)
+
+        let rootData: any = null
+        if (rootNodesData.length === 1) {
+            rootData = rootNodesData[0]
+        } else {
+            rootData = {
+                name: "VIRTUAL_ROOT",
+                virtual: true,
+                children: rootNodesData
+            }
+        }
+
         const hierarchy = d3.hierarchy(rootData)
-        const treeLayout = d3.tree().nodeSize([500, 240]) // Horizontal spacing fix
+        const treeLayout = d3.tree().nodeSize([500, 240])
         const rootNode = treeLayout(hierarchy)
 
         // Add defs for filters and patterns
@@ -135,7 +116,6 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
 
         // Helper to render card content
         const renderCardContent = (sel: d3.Selection<SVGGElement, any, any, any>, p: any, parentId?: string) => {
-            // Card Rect
             sel.append("rect")
                 .attr("width", 184)
                 .attr("height", 84)
@@ -147,7 +127,6 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
                 .attr("stroke-width", 2)
                 .attr("filter", `url(#${shadowFilterId})`)
 
-            // Avatar circle
             const avatar = sel.append("g").attr("transform", "translate(-62, 0)")
             avatar.append("circle").attr("r", 25).attr("fill", theme === "dark" ? "#334155" : "#f1f5f9")
 
@@ -156,12 +135,9 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
                 if (!defs.select(`#${patternId}`).size()) {
                     defs.append("pattern")
                         .attr("id", patternId)
-                        .attr("width", 1).attr("height", 1)
-                        .attr("patternContentUnits", "objectBoundingBox")
-                        .append("image")
-                        .attr("xlink:href", p.photoUrl)
-                        .attr("width", 1).attr("height", 1)
-                        .attr("preserveAspectRatio", "xMidYMid slice")
+                        .attr("width", 1).attr("height", 1).attr("patternContentUnits", "objectBoundingBox")
+                        .append("image").attr("xlink:href", p.photoUrl)
+                        .attr("width", 1).attr("height", 1).attr("preserveAspectRatio", "xMidYMid slice")
                 }
                 avatar.append("circle").attr("r", 25).attr("fill", `url(#${patternId})`)
             } else {
@@ -170,13 +146,10 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
             }
 
             const info = sel.append("g").attr("transform", "translate(-25, 0)")
-
-            // Fixed Name Overflow
             const nameStr = p?.name || "Unknown"
             const truncatedName = nameStr.length > 20 ? nameStr.substring(0, 18) + "..." : nameStr
             info.append("text").attr("dy", "-0.1em").attr("font-size", "13px").attr("font-weight", "bold").attr("fill", theme === "dark" ? "#f8fafc" : "#0f172a").text(truncatedName)
 
-            // Year and Partner disambiguation
             let subText = p?.dateOfBirth ? new Date(p.dateOfBirth).getFullYear().toString() : ""
             if (parentId && p.originFamily) {
                 const otherParent = p.originFamily.partners.find((part: any) => part.personId !== parentId)?.person
@@ -187,7 +160,6 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
             }
             info.append("text").attr("dy", "1.4em").attr("font-size", "11px").attr("fill", "#64748b").text(subText)
 
-            // Address truncation
             if (p?.placeOfBirth) {
                 const truncatedAddr = p.placeOfBirth.length > 22 ? p.placeOfBirth.substring(0, 20) + "..." : p.placeOfBirth
                 info.append("text").attr("dy", "2.8em").attr("font-size", "10px").attr("fill", "#94a3b8").text(truncatedAddr)
@@ -196,15 +168,15 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
 
         // Render Links
         g.append("g").attr("fill", "none").attr("stroke", "#cbd5e1").attr("stroke-opacity", 0.6).attr("stroke-width", 4)
-            .selectAll("path").data(rootNode.links()).join("path")
+            .selectAll("path").data(rootNode.links().filter((l: any) => !l.source.data.virtual)).join("path")
             .attr("d", d3.linkVertical().x((d: any) => d.x).y((d: any) => d.y) as any)
 
         // Render Nodes
-        const nodeSelection = g.append("g").selectAll("g").data(rootNode.descendants()).join("g")
+        const nodeSelection = g.append("g").selectAll("g").data(rootNode.descendants().filter((d: any) => !d.data.virtual)).join("g")
             .attr("transform", (d: any) => `translate(${d.x},${d.y})`)
             .attr("cursor", "pointer")
             .on("click", (e, d: any) => {
-                const p = persons.find(per => per.id === d.data.name)
+                const p = (persons as any[]).find(per => per.id === d.data.name)
                 if (p) { setSelectedPerson(p); setModalOpen(true); }
             })
 
@@ -233,7 +205,7 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
             const uniquePartners = Array.from(new Map(partnersList.map(pair => [pair.id, pair])).values())
             uniquePartners.forEach((partner: any, i) => {
                 const group = d3.select(this as SVGGElement)
-                const offset = 210 * (i + 1) // Horizontal offset for spouse
+                const offset = 210 * (i + 1)
                 group.append("path").attr("d", `M 92 0 L ${offset - 92} 0`).attr("stroke", "#ec4899").attr("stroke-width", 4).attr("stroke-dasharray", "4,4")
                 const pGroup = group.append("g").attr("transform", `translate(${offset}, 0)`).attr("cursor", "pointer")
                     .on("click", (e) => { e.stopPropagation(); setSelectedPerson(partner); setModalOpen(true); })
@@ -250,25 +222,28 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
         }
 
         // Initial Center
-        focusOn(rootNode.x, rootNode.y)
+        if (rootData.virtual) {
+            const firstChild = rootNode.children?.[0]
+            if (firstChild) focusOn(firstChild.x, firstChild.y)
+        } else {
+            focusOn(rootNode.x, rootNode.y)
+        }
 
-            // Expose focus function through window for search
-            ; (window as any).focusTreeNode = (id: string) => {
-                const target = rootNode.descendants().find((d: any) => d.data.name === id)
-                if (target) {
-                    focusOn(target.x, target.y)
-                } else {
-                    // Focus primary parent if it's a partner
-                    const nodes = rootNode.descendants()
-                    for (const d of nodes) {
-                        const p = (persons as any[]).find(per => per.id === (d.data as any).name)
-                        if (p?.partnerships?.some((part: any) => families.find(f => f.id === part.familyId)?.partners.some((fp: any) => fp.personId === id))) {
-                            focusOn(d.x, d.y)
-                            break
-                        }
+        ; (window as any).focusTreeNode = (id: string) => {
+            const target = rootNode.descendants().find((d: any) => d.data.name === id)
+            if (target) {
+                focusOn(target.x, target.y)
+            } else {
+                const nodes = rootNode.descendants()
+                for (const d of nodes) {
+                    const p = (persons as any[]).find(per => per.id === (d.data as any).name)
+                    if (p?.partnerships?.some((part: any) => families.find(f => f.id === part.familyId)?.partners.some((fp: any) => fp.personId === id))) {
+                        focusOn(d.x, d.y)
+                        break
                     }
                 }
             }
+        }
 
     }, [persons, families, theme])
 

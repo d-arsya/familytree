@@ -15,6 +15,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { findRoots } from "@/lib/tree-utils"
 
 // Types (Same as StaticTree)
 interface TreePerson extends Person {
@@ -43,35 +44,6 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
     const [endDepth, setEndDepth] = React.useState(100)
     const [zoomRef, setZoomRef] = React.useState<any>(null)
 
-    const findRoot = () => {
-        if (persons.length === 0) return null
-
-        // Start from the earliest-created person
-        const sorted = [...persons].sort((a, b) =>
-            new Date((a as any).createdAt).getTime() - new Date((b as any).createdAt).getTime()
-        )
-        let candidate = sorted[0]
-
-        // Walk upward to find the top-most ancestor
-        const visited = new Set<string>()
-        while (candidate) {
-            visited.add((candidate as any).id)
-            if (!(candidate as any).originFamilyId) break
-
-            const originFam = families.find(f => f.id === (candidate as any).originFamilyId)
-            if (!originFam || !originFam.partners || originFam.partners.length === 0) break
-
-            // Move to the first partner found in the origin family
-            const parentPartner = originFam.partners[0]
-            const parent = persons.find(p => (p as any).id === parentPartner.personId)
-
-            if (!parent || visited.has((parent as any).id)) break
-            candidate = parent
-        }
-
-        return candidate
-    }
-
     // Search Logic
     React.useEffect(() => {
         if (searchQuery.length > 2) {
@@ -98,9 +70,6 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
             })
         svg.call(zoom)
         setZoomRef(() => zoom)
-
-        const rootPerson = findRoot()
-        if (!rootPerson) return
 
         // Build adjacency list
         const childrenMap = new Map<string, string[]>()
@@ -130,8 +99,8 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
 
             if (node.children.length > 0) {
                 node.children.sort((a: any, b: any) => {
-                    const pA = persons.find(p => p.id === a.name)
-                    const pB = persons.find(p => p.id === b.name)
+                    const pA = (persons as any[]).find(p => p.id === a.name)
+                    const pB = (persons as any[]).find(p => p.id === b.name)
                     if (!pA || !pB) return 0
                     return new Date(pA.createdAt).getTime() - new Date(pB.createdAt).getTime()
                 })
@@ -141,9 +110,26 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
             return node
         }
 
-        let rootData = buildHierarchy(rootPerson.id, 1)
+        const rootsList = findRoots(persons, families)
+        if (rootsList.length === 0) return
 
-        // Handle startDepth > 1 by finding all nodes at that depth
+        // Build hierarchy for each root found
+        const rootNodesData = rootsList.map(root => buildHierarchy(root.id, 1)).filter(Boolean)
+
+        let rootData: any = null
+        if (rootNodesData.length === 1) {
+            rootData = rootNodesData[0]
+        } else if (rootNodesData.length > 1) {
+            rootData = {
+                name: "VIRTUAL_ROOT",
+                virtual: true,
+                children: rootNodesData
+            }
+        } else {
+            return
+        }
+
+        // Apply depth filtering
         if (rootData && startDepth > 1) {
             const nodesAtStart: any[] = []
             const findAtDepth = (n: any) => {
@@ -169,11 +155,10 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
             }
         }
 
-        if (!rootData) return // If no nodes remain after filtering
+        if (!rootData) return
         const hierarchy = d3.hierarchy(rootData)
 
         // Horizontal Layout: nodeSize([height, width]) 
-        // Increased vertical gap significantly to 240px to accommodate multiple partners
         const treeLayout = d3.tree().nodeSize([240, 280])
         const rootNode = treeLayout(hierarchy)
 
@@ -189,19 +174,17 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
 
         // Helper: Card Renderer
         const renderCardContent = (sel: d3.Selection<SVGGElement, any, any, any>, p: any) => {
-            // Minimized Gap Card Style
             sel.append("rect")
-                .attr("width", 220) // Normal width
-                .attr("height", 70) // Reduced height
+                .attr("width", 220)
+                .attr("height", 70)
                 .attr("x", -110)
                 .attr("y", -35)
-                .attr("rx", 35) // Pill shape
+                .attr("rx", 35)
                 .attr("fill", theme === "dark" ? "#1e293b" : "#ffffff")
                 .attr("stroke", p?.gender === "MALE" ? "#3b82f6" : p?.gender === "FEMALE" ? "#ec4899" : "#94a3b8")
                 .attr("stroke-width", 4)
                 .attr("filter", `url(#${shadowFilterId})`)
 
-            // Avatar
             const avatar = sel.append("g").attr("transform", "translate(-85, 0)")
             avatar.append("circle").attr("r", 28).attr("fill", theme === "dark" ? "#334155" : "#f1f5f9")
 
@@ -221,9 +204,7 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
             }
 
             const info = sel.append("g").attr("transform", "translate(-45, 0)")
-
             const nameStr = p?.name || "Unknown"
-            // Smarter truncation
             let displayName = nameStr
             if (nameStr.length > 25) {
                 const parts = nameStr.split(" ")
@@ -248,10 +229,10 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
                 .text(dateRange)
         }
 
-        // Render Links (Horizontal)
+        // Render Links
         g.append("g").attr("fill", "none").attr("stroke", "#cbd5e1").attr("stroke-opacity", 0.6).attr("stroke-width", 4)
             .selectAll("path")
-            .data(rootNode.links().filter((l: any) => !l.source.data.virtual)) // Hide links from virtual root
+            .data(rootNode.links().filter((l: any) => !l.source.data.virtual))
             .join("path")
             .attr("d", d3.linkHorizontal()
                 .x((d: any) => d.y)
@@ -261,12 +242,12 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
         // Render Nodes
         const nodeSelection = g.append("g")
             .selectAll("g")
-            .data(rootNode.descendants().filter((d: any) => !d.data.virtual)) // Hide virtual root node
+            .data(rootNode.descendants().filter((d: any) => !d.data.virtual))
             .join("g")
             .attr("transform", (d: any) => `translate(${d.y},${d.x})`)
             .attr("cursor", "pointer")
             .on("click", (e, d: any) => {
-                const p = persons.find(per => per.id === d.data.name)
+                const p = (persons as any[]).find(per => per.id === d.data.name)
                 if (p) { setSelectedPerson(p); setModalOpen(true); }
             })
 
@@ -275,8 +256,7 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
             renderCardContent(d3.select(this), p)
         })
 
-        // Render Partners - Vertical Gap Issue
-        // If we reduce node gap, partners must be closer too.
+        // Render Partners
         nodeSelection.each(function (this: any, d: any) {
             const p = (persons as any[]).find(per => per.id === d.data.name)
             if (!p || !p.partnerships) return
@@ -294,25 +274,17 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
             })
 
             const uniquePartners = Array.from(new Map(partnersList.map(pair => [pair.id, pair])).values())
-
             uniquePartners.forEach((partner: any, i) => {
                 const group = d3.select(this as SVGGElement)
-                const offset = 85 * (i + 1) // Offset 85px (Card is 70px height)
-
-                // Connector
+                const offset = 85 * (i + 1)
                 group.append("path")
-                    .attr("d", `M 0 35 L 0 ${offset - 35}`) // Vertical line
+                    .attr("d", `M 0 35 L 0 ${offset - 35}`)
                     .attr("stroke", "#ec4899").attr("stroke-width", 4).attr("stroke-dasharray", "4,4")
-
                 const pGroup = group.append("g")
-                    .attr("transform", `translate(0, ${offset})`) // Move down
+                    .attr("transform", `translate(0, ${offset})`)
                     .attr("cursor", "pointer")
                     .on("click", (e) => { e.stopPropagation(); setSelectedPerson(partner); setModalOpen(true); })
-
                 renderCardContent(pGroup, partner)
-
-                partner.xCoords = d.y; // X on screen
-                partner.yCoords = d.x + offset; // Y on screen
             })
         })
 
@@ -327,23 +299,27 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
                 )
             }
         }
-        focusOn(rootNode.y, rootNode.x)
 
-            ; (window as any).focusHorizontalNode = (id: string) => {
-                const target = rootNode.descendants().find((d: any) => d.data.name === id)
-                if (target) {
-                    focusOn(target.y, target.x)
-                }
+        if (rootData.virtual) {
+            const firstChild = rootNode.children?.[0]
+            if (firstChild) focusOn(firstChild.y, firstChild.x)
+        } else {
+            focusOn(rootNode.y, rootNode.x)
+        }
+
+        ; (window as any).focusHorizontalNode = (id: string) => {
+            const target = rootNode.descendants().find((d: any) => d.data.name === id)
+            if (target) {
+                focusOn(target.y, target.x)
             }
+        }
 
     }, [persons, families, theme, startDepth, endDepth])
 
     return (
         <div className="w-full h-full relative group bg-gradient-to-r from-background to-muted/20">
-
             {/* Toolbar */}
             <div className="absolute top-4 left-4 z-50 flex flex-col gap-2">
-                {/* Search - Higher z-index to stay above filter */}
                 <div className="relative w-72 z-10">
                     <input
                         type="text"
@@ -376,7 +352,6 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
                     )}
                 </div>
 
-                {/* Generation Filter - Lower z-index */}
                 <div className="relative z-0 bg-background/80 backdrop-blur-md border rounded-xl shadow-lg p-3 flex items-center gap-2">
                     <FilterIcon className="size-4 text-muted-foreground" />
                     <div className="flex items-center gap-2">
@@ -422,7 +397,6 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
                 } : undefined}
             />
 
-            {/* Edit Dialog */}
             {isEditor && personToEdit && (
                 <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
                     <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -434,7 +408,6 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
                             onSuccess={() => {
                                 setEditDialogOpen(false)
                                 setPersonToEdit(null)
-                                // Reload page to see changes
                                 window.location.reload()
                             }}
                             onCancel={() => {
