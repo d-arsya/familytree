@@ -205,7 +205,7 @@ export function D3Tree({ persons, families }: D3TreeProps) {
             .attr("r", 6)
             .attr("fill", "#64748b")
             .attr("stroke", "#fff")
-            .attr("stroke-width", 2)
+            .attr("stroke-width", 4)
 
         function ticked() {
             link

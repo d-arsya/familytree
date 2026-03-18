@@ -177,7 +177,7 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
                 .attr("rx", 35) // Pill shape
                 .attr("fill", theme === "dark" ? "#1e293b" : "#ffffff")
                 .attr("stroke", p?.gender === "MALE" ? "#3b82f6" : p?.gender === "FEMALE" ? "#ec4899" : "#94a3b8")
-                .attr("stroke-width", 2)
+                .attr("stroke-width", 4)
                 .attr("filter", `url(#${shadowFilterId})`)
 
             // Avatar
@@ -228,7 +228,7 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
         }
 
         // Render Links (Horizontal)
-        g.append("g").attr("fill", "none").attr("stroke", "#cbd5e1").attr("stroke-opacity", 0.6).attr("stroke-width", 2)
+        g.append("g").attr("fill", "none").attr("stroke", "#cbd5e1").attr("stroke-opacity", 0.6).attr("stroke-width", 4)
             .selectAll("path")
             .data(rootNode.links().filter((l: any) => !l.source.data.virtual)) // Hide links from virtual root
             .join("path")
@@ -281,7 +281,7 @@ export function HorizontalTree({ persons, families, isEditor = false }: Horizont
                 // Connector
                 group.append("path")
                     .attr("d", `M 0 35 L 0 ${offset - 35}`) // Vertical line
-                    .attr("stroke", "#ec4899").attr("stroke-width", 2).attr("stroke-dasharray", "4,4")
+                    .attr("stroke", "#ec4899").attr("stroke-width", 4).attr("stroke-dasharray", "4,4")
 
                 const pGroup = group.append("g")
                     .attr("transform", `translate(0, ${offset})`) // Move down

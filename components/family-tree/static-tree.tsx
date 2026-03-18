@@ -176,7 +176,7 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
         }
 
         // Render Links
-        g.append("g").attr("fill", "none").attr("stroke", "#cbd5e1").attr("stroke-opacity", 0.6).attr("stroke-width", 2)
+        g.append("g").attr("fill", "none").attr("stroke", "#cbd5e1").attr("stroke-opacity", 0.6).attr("stroke-width", 4)
             .selectAll("path").data(rootNode.links()).join("path")
             .attr("d", d3.linkVertical().x((d: any) => d.x).y((d: any) => d.y) as any)
 
@@ -215,7 +215,7 @@ export function StaticTree({ persons, families, readOnly = false }: StaticTreePr
             uniquePartners.forEach((partner: any, i) => {
                 const group = d3.select(this as SVGGElement)
                 const offset = 210 * (i + 1) // Horizontal offset for spouse
-                group.append("path").attr("d", `M 92 0 L ${offset - 92} 0`).attr("stroke", "#ec4899").attr("stroke-width", 2).attr("stroke-dasharray", "4,4")
+                group.append("path").attr("d", `M 92 0 L ${offset - 92} 0`).attr("stroke", "#ec4899").attr("stroke-width", 4).attr("stroke-dasharray", "4,4")
                 const pGroup = group.append("g").attr("transform", `translate(${offset}, 0)`).attr("cursor", "pointer")
                     .on("click", (e) => { e.stopPropagation(); setSelectedPerson(partner); setModalOpen(true); })
                 renderCardContent(pGroup, partner)

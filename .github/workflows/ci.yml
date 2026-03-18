@@ -31,3 +31,21 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:mbahdul
           build-args: |
             DATABASE_URL=${{ secrets.DATABASE_URL }}
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment: VPS
+
+    steps:
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd /media/${{ github.event.repository.name }}
+            docker compose pull
+            docker compose down
+            docker compose up -d
