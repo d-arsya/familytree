@@ -1,84 +1,25 @@
-import Link from "next/link"
-import { ArrowLeftIcon, HeartIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
+/*
 import { CalculatorClient } from "@/components/family-tree/calculator-client"
-
-// Types
-type PersonSimple = {
-    id: string,
-    name: string,
-    gender?: string | null,
-    fatherId?: string | null,
-    motherId?: string | null,
-    spouseIds?: string[]
-}
-
-// Stats fetcher
 import { prisma } from "@/lib/prisma"
 import { unstable_noStore } from "next/cache"
+*/
 
+import Link from "next/link"
+import { ArrowLeftIcon, HeartIcon, ConstructionIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+
+/*
 async function getData() {
     unstable_noStore()
     const allPeople = await prisma.person.findMany({
-        select: {
-            id: true,
-            name: true,
-            gender: true,
-            originFamily: {
-                select: {
-                    partners: {
-                        select: {
-                            person: {
-                                select: {
-                                    id: true,
-                                    gender: true
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            partnerships: {
-                select: {
-                    family: {
-                        select: {
-                            partners: {
-                                select: {
-                                    personId: true
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        // ... existing select logic ...
     })
-
-    return allPeople.map(p => {
-        const potentialParents = p.originFamily?.partners?.map(part => part.person) || []
-        const father = potentialParents.find(pp => pp.gender === "MALE")?.id
-        const mother = potentialParents.find(pp => pp.gender === "FEMALE")?.id
-
-        // Extract spouse IDs from all families they are part of
-        const spouseIds = p.partnerships.flatMap(part =>
-            part.family.partners
-                .filter(fp => fp.personId !== p.id)
-                .map(fp => fp.personId)
-        )
-
-        return {
-            id: p.id,
-            name: p.name,
-            gender: p.gender,
-            fatherId: father,
-            motherId: mother,
-            spouseIds: Array.from(new Set(spouseIds))
-        }
-    })
+    // ... mapping logic ...
 }
+*/
 
 export default async function CalculatorPage() {
-    const people = await getData()
+    // const people = await getData()
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
@@ -96,8 +37,19 @@ export default async function CalculatorPage() {
                 </div>
             </header>
 
-            <main className="flex-1 container mx-auto p-4 md:p-8">
-                <CalculatorClient people={people} />
+            <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 text-center space-y-4">
+                <div className="size-20 bg-primary/10 rounded-full flex items-center justify-center text-primary animate-pulse">
+                    <ConstructionIcon className="size-10" />
+                </div>
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Segera Hadir</h1>
+                <p className="text-muted-foreground max-w-md mx-auto text-lg">
+                    Fitur kalkulator silsilah dan cek hubungan keluarga sedang dalam tahap pengembangan.
+                </p>
+                <Button variant="outline" asChild className="mt-8 rounded-full">
+                    <Link href="/">
+                        Kembali ke Beranda
+                    </Link>
+                </Button>
             </main>
         </div>
     )
