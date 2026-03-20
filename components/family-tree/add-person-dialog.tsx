@@ -32,10 +32,10 @@ export function AddPersonDialog({ trigger, onSuccess }: AddPersonDialogProps) {
                     </Button>
                 )}
             </DialogTrigger>
-            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle>Tambah Anggota Keluarga</DialogTitle>
-                    <DialogDescription>
+            <DialogContent className="sm:max-w-[600px] w-[95vw] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+                <DialogHeader className="sm:text-left">
+                    <DialogTitle className="text-xl sm:text-2xl">Tambah Anggota Keluarga</DialogTitle>
+                    <DialogDescription className="text-sm sm:text-base">
                         Masukkan informasi dasar untuk anggota keluarga baru.
                     </DialogDescription>
                 </DialogHeader>

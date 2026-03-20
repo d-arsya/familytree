@@ -19,17 +19,21 @@ export default function HomePage() {
       <div className="absolute top-0 inset-x-0 h-96 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
 
       {/* Navigation */}
-      <nav className="relative z-10 container mx-auto px-6 py-8 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="bg-primary/10 p-2 rounded-xl">
-            <TreesIcon className="size-6 text-primary" />
+      <nav className="relative z-10 container mx-auto px-4 sm:px-6 py-4 sm:py-8 flex items-center justify-between">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="bg-primary/10 p-1.5 sm:p-2 rounded-xl">
+            <TreesIcon className="size-5 sm:size-6 text-primary" />
           </div>
-          <span className="text-lg font-serif font-bold tracking-tight">Keluarga Besar</span>
+          <span className="text-base sm:text-lg font-serif font-bold tracking-tight whitespace-nowrap">Keluarga Besar</span>
         </div>
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-1.5 sm:gap-4">
           <ThemeToggle />
-          <Button variant="ghost" className="font-medium" asChild>
-            <Link href="/tree">Buka Pohon Keluarga <ArrowRightIcon className="ml-2 size-4" /></Link>
+          <Button variant="ghost" size="sm" className="font-medium h-9 sm:h-10 px-2 sm:px-4" asChild>
+            <Link href="/tree" className="flex items-center">
+              <span className="hidden sm:inline">Buka Pohon Keluarga</span>
+              <span className="sm:hidden">Pohon</span>
+              <ArrowRightIcon className="ml-1 sm:ml-2 size-3 sm:size-4" />
+            </Link>
           </Button>
         </div>
       </nav>

@@ -207,7 +207,7 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
                 )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label>Jenis Kelamin</Label>
                     <Select
@@ -241,7 +241,7 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
             {/* Relationship Section */}
             <div className="space-y-3 border-t pt-4">
                 <p className="text-sm font-medium">Hubungan Keluarga (Opsional)</p>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label>Ayah</Label>
                         <Select
@@ -289,7 +289,7 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
 
             {/* Data Kelahiran */}
             <div className="border-t pt-4 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                     <div className="space-y-2">
                         <Label>Provinsi</Label>
@@ -323,7 +323,7 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label>Tanggal Lahir</Label>
                         <Input type="date" {...form.register("dateOfBirth")} className="h-9" />
@@ -340,7 +340,7 @@ export function PersonForm({ defaultValues, onSuccess, onCancel }: PersonFormPro
                 <Textarea {...form.register("bio")} placeholder="Catatan tambahan..." />
             </div>
 
-            <div className="flex justify-end gap-2 pt-4">
+            <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm -mx-4 sm:-mx-6 px-4 sm:px-6 flex justify-end gap-2 py-4 border-t mt-4 z-10 sm:static sm:bg-transparent sm:backdrop-filter-none sm:p-0 sm:border-0 sm:mt-8">
                 {onCancel && (
                     <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
                         Batal

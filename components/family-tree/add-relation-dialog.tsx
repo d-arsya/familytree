@@ -64,14 +64,14 @@ export function AddRelationDialog({
                     </Button>
                 )}
             </DialogTrigger>
-            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle>
+            <DialogContent className="sm:max-w-[600px] w-[95vw] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+                <DialogHeader className="sm:text-left">
+                    <DialogTitle className="text-xl sm:text-2xl">
                         {defaultRelation === "SPOUSE" && `Tambah Pasangan untuk ${personName}`}
                         {defaultRelation === "CHILD" && `Tambah Anak untuk ${personName}`}
                         {defaultRelation === "PARENT" && `Tambah Orang Tua untuk ${personName}`}
                     </DialogTitle>
-                    <DialogDescription>
+                    <DialogDescription className="text-sm sm:text-base">
                         Lengkapi data anggota keluarga baru di bawah ini.
                     </DialogDescription>
                 </DialogHeader>

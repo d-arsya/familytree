@@ -105,22 +105,21 @@ export default function EditorPage() {
     return (
         <div className="h-screen flex flex-col bg-background">
             {/* Header - Interactive & Responsive */}
-            <header className="flex-none z-40 glass border-b px-3 sm:px-4 py-2 flex items-center justify-between">
-                <div className="flex items-center gap-2 sm:gap-4">
-                    <Button variant="ghost" size="icon" asChild title="Back">
+            <header className="flex-none z-40 glass border-b px-2 sm:px-4 py-2 flex items-center justify-between">
+                <div className="flex items-center gap-1 sm:gap-4">
+                    <Button variant="ghost" size="icon" className="size-9 sm:size-10" asChild title="Back">
                         <Link href="/tree">
-                            <ArrowLeftIcon className="size-5" />
+                            <ArrowLeftIcon className="size-4 sm:size-5" />
                         </Link>
                     </Button>
-                    <div className="flex items-center gap-2">
-                        <TreesIcon className="size-5 text-primary" />
-                        <span className="font-semibold text-sm sm:text-base hidden sm:inline-block">Editor Pohon</span>
-                        <span className="font-semibold text-sm sm:hidden">Editor</span>
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                        <TreesIcon className="size-4 sm:size-5 text-primary" />
+                        <span className="font-semibold text-sm sm:text-base hidden xs:inline-block">Editor Pohon</span>
                     </div>
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2">
                     <ThemeToggle />
-                    <Button variant="outline" size="sm" asChild className="px-2 sm:px-3">
+                    <Button variant="outline" size="sm" className="h-9 sm:h-10 px-2 sm:px-3" asChild>
                         <Link href="/tree">
                             <GalleryHorizontalEndIcon className="size-4 sm:mr-2" />
                             <span className="hidden sm:inline">View Mode</span>
